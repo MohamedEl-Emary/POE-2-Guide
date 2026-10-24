@@ -135,6 +135,8 @@ export const NAV: NavSection[] = [
     links: [
       { label: 'Glossary', href: '/glossary/' },
       { label: 'Passive tree', href: '/passive-tree/' },
+      { label: 'Item gallery', href: '/items/' },
+      { label: 'Unique items', href: '/items/uniques/' },
       { label: 'Patch history', href: '/patches/' },
       { label: 'Tools', href: '/tools/' },
       { label: 'About', href: '/about/' },
