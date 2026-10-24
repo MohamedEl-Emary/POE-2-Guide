@@ -1,0 +1,4 @@
+# Only install package versions that have been public for at least 3 days.
+# pnpm 11 enforces a 1-day minimum by default; matching it here keeps the
+# lockfile installable everywhere.
+minimumReleaseAge: 4320
