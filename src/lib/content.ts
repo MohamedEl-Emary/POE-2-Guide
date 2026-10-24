@@ -13,7 +13,7 @@ export function guideHref(entry: CollectionEntry<'guides'>): string {
   return `/${entry.id.replace(/\/?index$/, '')}/`.replace(/\/+/g, '/');
 }
 
-const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/'];
+const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/', '/passive-tree/'];
 
 /** Every route that exists in this build, used to grey out nav links for pages not written yet. */
 export async function getLiveRoutes(): Promise<Set<string>> {

@@ -1,0 +1,119 @@
+---
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Callout from '../components/Callout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Passive tree', href: '/passive-tree/' },
+];
+const buttonClass = 'rounded-md border border-border bg-surface px-3 py-1.5 text-sm font-semibold hover:border-accent';
+---
+
+<BaseLayout
+  title="Passive tree explorer"
+  description="Explore the full Path of Exile 2 passive skill tree: zoom in, search for any stat, read every node in plain English and plan your points from your class's starting spot."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-7xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div data-pagefind-body>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Passive tree explorer</h1>
+      <p class="mt-4 max-w-3xl text-lg text-muted">
+        This is the whole Path of Exile 2 passive tree. You get one point per level (plus a few from quests), and every
+        point unlocks one node next to something you already have. Pick your class to see where you start, then search
+        for the stats your build wants.
+      </p>
+    </div>
+
+    <div data-tree class="mt-6">
+      <div class="flex flex-wrap items-end gap-3">
+        <label class="flex flex-col text-sm font-semibold">
+          Class
+          <select data-class class="mt-1 rounded-md border border-border bg-surface px-2 py-1.5 font-normal"></select>
+        </label>
+        <label class="flex min-w-48 flex-1 flex-col text-sm font-semibold">
+          Search nodes
+          <input
+            data-search
+            type="search"
+            placeholder="Try “minion”, “block” or “fire”"
+            class="mt-1 rounded-md border border-border bg-surface px-2 py-1.5 font-normal"
+          />
+        </label>
+        <button type="button" data-next class={buttonClass}>Next match</button>
+        <span data-search-count class="self-center text-sm text-muted" aria-live="polite"></span>
+      </div>
+
+      <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_18rem]">
+        <div class="relative overflow-hidden rounded-lg border border-border">
+          <canvas
+            class="block h-[65vh] min-h-96 w-full cursor-grab touch-none"
+            aria-label="Interactive passive skill tree. Use the search box and the node panel for a text view."
+          ></canvas>
+          <p data-status class="absolute inset-0 grid place-items-center text-muted">Loading the passive tree…</p>
+          <div class="absolute right-2 top-2 flex gap-1">
+            <button type="button" data-zoom-in class={buttonClass} aria-label="Zoom in">+</button>
+            <button type="button" data-zoom-out class={buttonClass} aria-label="Zoom out">−</button>
+            <button type="button" data-fit class={buttonClass}>Fit</button>
+          </div>
+        </div>
+
+        <aside class="flex flex-col gap-4">
+          <div class="rounded-lg border border-border bg-surface p-4">
+            <p class="text-sm text-muted">Points used</p>
+            <p class="text-3xl font-bold" data-points aria-live="polite">0</p>
+            <div class="mt-2 flex gap-2">
+              <button type="button" data-reset class={buttonClass}>Reset</button>
+            </div>
+            <p class="mt-2 text-xs text-muted">The page address updates as you plan, so you can copy it to share your tree.</p>
+          </div>
+          <div data-panel class="min-h-40 rounded-lg border border-border bg-surface p-4" aria-live="polite"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="mt-8 grid max-w-5xl gap-6 md:grid-cols-2">
+      <div>
+        <h2 class="text-xl font-bold">How to use it</h2>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-muted">
+          <li><strong class="text-fg">Mouse:</strong> drag to move, scroll to zoom, click a node to take it (and the cheapest path to it). Click it again to give it back.</li>
+          <li><strong class="text-fg">Touch:</strong> drag to move, pinch to zoom, tap a node to read it, then use the button in the panel.</li>
+          <li>Names appear once you zoom in. Search highlights every node whose name or stats match.</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold">What the shapes mean</h2>
+        <ul class="mt-2 space-y-1 text-muted">
+          <li><strong class="text-fg">Small dots:</strong> small passives with a minor bonus.</li>
+          <li><strong class="text-fg">Hollow dots:</strong> attribute nodes. You pick Strength, Dexterity or Intelligence.</li>
+          <li><strong class="text-fg">Large dots:</strong> notables, the strong nodes builds path towards.</li>
+          <li><strong class="text-fg">Large diamonds:</strong> keystones, which change how your character works, often with a downside.</li>
+          <li><strong class="text-fg">Small hollow diamonds:</strong> jewel sockets.</li>
+          <li><strong class="text-fg">Rings:</strong> class starting spots.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="max-w-3xl">
+      <Callout type="beginner">
+        <p>
+          You don't need to plan all of this before you play. While levelling, follow your build guide's tree or grab
+          notables that boost your main skill and your life. Refunding points later costs gold and nothing else.
+        </p>
+      </Callout>
+      <p class="mt-6 text-sm text-muted">
+        Tree data comes from Grinding Gear Games' official <a class="text-accent underline" href="https://github.com/grindinggear/poe2-skilltree-export">passive tree export</a>
+        (version 0.5.2). Ascendancy nodes aren't shown yet. For full build planning with gear and skills, use
+        <a class="text-accent underline" href="https://pathofbuilding.community/">Path of Building</a>. The node shapes and
+        colours are our own, not the game's artwork.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initPassiveTree } from '../scripts/passive-tree';
+  const root = document.querySelector<HTMLElement>('[data-tree]');
+  if (root) initPassiveTree(root);
+</script>

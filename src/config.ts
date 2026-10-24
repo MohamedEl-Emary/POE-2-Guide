@@ -134,6 +134,7 @@ export const NAV: NavSection[] = [
     blurb: 'Look things up.',
     links: [
       { label: 'Glossary', href: '/glossary/' },
+      { label: 'Passive tree', href: '/passive-tree/' },
       { label: 'Patch history', href: '/patches/' },
       { label: 'Tools', href: '/tools/' },
       { label: 'About', href: '/about/' },
