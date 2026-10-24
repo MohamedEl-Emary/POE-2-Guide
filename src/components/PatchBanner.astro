@@ -1,0 +1,49 @@
+---
+import { CURRENT_PATCH } from '../config';
+import { formatDate, isoDate } from '../lib/format';
+import { getPatchState, type ContentStatus } from '../lib/patch';
+import PatchBadge from './PatchBadge.astro';
+
+export interface Props {
+  patch: string;
+  status: ContentStatus;
+  lastVerified: Date;
+}
+const { patch, status, lastVerified } = Astro.props;
+const state = getPatchState({ patch, status });
+const iso = isoDate(lastVerified);
+const pretty = formatDate(lastVerified);
+---
+
+{
+  state === 'current' ? (
+    <p class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <PatchBadge patch={patch} status={status} />
+      <span>Last verified <time datetime={iso}>{pretty}</time></span>
+    </p>
+  ) : (
+    <div
+      role="note"
+      data-patch-state={state}
+      class:list={[
+        'rounded-lg border px-4 py-3 text-sm',
+        state === 'review' ? 'border-warn-border bg-warn-bg text-warn-fg' : 'border-bad-border bg-bad-bg text-bad-fg',
+      ]}
+    >
+      {state === 'review' ? (
+        <p>
+          <strong>Written for patch {patch}, may be outdated.</strong>{' '}
+          {status === 'needs-review'
+            ? 'This page is being re-checked against the current game.'
+            : `The game is now on ${CURRENT_PATCH}; some details may have changed.`}{' '}
+          Last verified <time datetime={iso}>{pretty}</time>.
+        </p>
+      ) : (
+        <p>
+          <strong>Outdated (written for patch {patch}).</strong> Parts of this page no longer match the
+          current game ({CURRENT_PATCH}). It's kept online for reference while it's rewritten. Last verified <time datetime={iso}>{pretty}</time>.
+        </p>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page not found" description="This page doesn't exist, or hasn't been written yet. Try the beginner path or search the guide." noindex>
+  <div class="mx-auto max-w-2xl px-4 py-24 text-center" data-pagefind-ignore>
+    <p class="font-display text-6xl font-bold text-accent">404</p>
+    <h1 class="mt-4 text-3xl font-bold">This path leads nowhere</h1>
+    <p class="mt-4 text-muted">
+      The page you're looking for doesn't exist, or it hasn't been written yet. The guide is growing quickly ahead of the 1.0 launch.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="/" class="rounded-lg bg-accent px-5 py-3 font-semibold text-accent-fg hover:bg-accent-strong">Go home</a>
+      <a href="/start-here/" class="rounded-lg border border-border px-5 py-3 font-semibold hover:border-accent">Start here</a>
+      <a href="/search/" class="rounded-lg border border-border px-5 py-3 font-semibold hover:border-accent">Search</a>
+    </div>
+  </div>
+</BaseLayout>

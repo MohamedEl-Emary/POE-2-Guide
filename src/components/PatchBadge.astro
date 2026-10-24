@@ -1,0 +1,29 @@
+---
+import { CURRENT_PATCH } from '../config';
+import { getPatchState, type ContentStatus } from '../lib/patch';
+
+export interface Props {
+  patch: string;
+  status: ContentStatus;
+}
+const { patch, status } = Astro.props;
+const state = getPatchState({ patch, status });
+const label = {
+  current: `Up to date for ${CURRENT_PATCH}`,
+  review: `Written for ${patch}`,
+  outdated: 'Outdated',
+}[state];
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+    state === 'current' && 'border-ok-border bg-ok-bg text-ok-fg',
+    state === 'review' && 'border-warn-border bg-warn-bg text-warn-fg',
+    state === 'outdated' && 'border-bad-border bg-bad-bg text-bad-fg',
+  ]}
+  data-patch-state={state}
+>
+  <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true"></span>
+  {label}
+</span>

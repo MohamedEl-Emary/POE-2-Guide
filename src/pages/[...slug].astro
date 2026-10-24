@@ -1,0 +1,31 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Callout from '../components/Callout.astro';
+import GlossaryTerm from '../components/GlossaryTerm.astro';
+import { NAV } from '../config';
+import GuideLayout from '../layouts/GuideLayout.astro';
+import { getPublished, guideHref } from '../lib/content';
+
+export async function getStaticPaths() {
+  const guides = await getPublished('guides');
+  return guides.map((entry) => ({
+    params: { slug: guideHref(entry).slice(1, -1) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<'guides'> };
+const { Content, headings } = await render(entry);
+const href = guideHref(entry);
+
+const section = NAV.find((s) => href.startsWith(s.href) && s.href !== href);
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  ...(section ? [{ label: section.title, href: section.href }] : []),
+  { label: entry.data.title, href },
+];
+---
+
+<GuideLayout {...entry.data} breadcrumbs={breadcrumbs} headings={headings}>
+  <Content components={{ Callout, GlossaryTerm }} />
+</GuideLayout>

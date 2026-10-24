@@ -1,0 +1,68 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Callout from '../../components/Callout.astro';
+import Card from '../../components/Card.astro';
+import PatchBadge from '../../components/PatchBadge.astro';
+import { NAV } from '../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished, guideHref } from '../../lib/content';
+
+const section = NAV.find((s) => s.title === 'Start Here')!;
+const guides = (await getPublished('guides')).filter((g) => g.data.section === 'start-here');
+const byHref = new Map(guides.map((g) => [guideHref(g), g]));
+
+// Planned reading order comes from the nav config; any extra start-here guides follow it.
+const planned = section.links.map((l) => ({ ...l, entry: byHref.get(l.href) }));
+const extras = guides
+  .filter((g) => !section.links.some((l) => l.href === guideHref(g)))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((g) => ({ label: g.data.title, href: guideHref(g), entry: g }));
+const steps = [...planned, ...extras];
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Start Here', href: '/start-here/' },
+];
+---
+
+<BaseLayout
+  title="Start Here: the new player path"
+  description="New to Path of Exile 2? Follow this reading order to learn the basics, pick a class, understand core systems and get ready to trade, step by step."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-3xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Start here</h1>
+    <p class="mt-4 text-lg text-muted">
+      Never played Path of Exile before? Work through these pages in order. Each one is short, and together they cover
+      what you need to know before and during your first character.
+    </p>
+
+    <Callout type="beginner" title="The short version">
+      <p>Pick a class that sounds fun, follow the story, and don't worry about making mistakes. You can't ruin a first character badly enough to matter, and every system here is easier to learn by playing.</p>
+    </Callout>
+
+    <ol class="mt-8 space-y-4">
+      {steps.map((step, i) => (
+        <li>
+          <Card href={step.entry ? step.href : undefined} class="flex gap-4">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent font-display text-lg font-bold text-accent" aria-hidden="true">{i + 1}</span>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-lg font-semibold">
+                <span class="sr-only">Step {i + 1}: </span>{step.entry?.data.title ?? step.label}
+              </h2>
+              {step.entry ? (
+                <>
+                  <p class="mt-1 text-sm text-muted">{step.entry.data.description}</p>
+                  <p class="mt-2"><PatchBadge patch={step.entry.data.patch} status={step.entry.data.status} /></p>
+                </>
+              ) : (
+                <p class="mt-1 text-sm text-muted">Being written. Check back soon.</p>
+              )}
+            </div>
+          </Card>
+        </li>
+      ))}
+    </ol>
+  </div>
+</BaseLayout>

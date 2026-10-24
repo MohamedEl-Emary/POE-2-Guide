@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './Card.astro';
+
+export interface Props {
+  entry: CollectionEntry<'ascendancies'>;
+}
+const { entry } = Astro.props;
+const d = entry.data;
+---
+
+<Card href={`/ascendancies/${entry.id}/`}>
+  <h3 class="text-lg font-semibold">{d.title}</h3>
+  <p class="mt-1 text-sm text-muted">Added in {d.addedInPatch}</p>
+  {d.bestFor.length > 0 && <p class="mt-3 text-sm">Best for: {d.bestFor.join(', ')}</p>}
+</Card>

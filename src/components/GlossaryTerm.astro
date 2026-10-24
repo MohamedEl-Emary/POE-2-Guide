@@ -1,0 +1,28 @@
+---
+import { getEntry } from 'astro:content';
+
+export interface Props {
+  /** Glossary entry id, e.g. "divine-orb". */
+  id: string;
+}
+const { id } = Astro.props;
+const entry = await getEntry('glossary', id);
+if (!entry) throw new Error(`GlossaryTerm: no glossary entry "${id}" in src/content/glossary/`);
+const tipId = `gloss-${id}-${Math.random().toString(36).slice(2, 7)}`;
+---
+
+<span class="group relative inline">
+  <a
+    href={`/glossary/#${id}`}
+    class="cursor-help text-fg underline decoration-accent decoration-dotted underline-offset-4 hover:text-accent"
+    aria-describedby={tipId}
+  ><slot>{entry.data.term}</slot></a>
+  <span
+    role="tooltip"
+    id={tipId}
+    class="pointer-events-none absolute hidden bottom-full left-1/2 z-30 mb-2 w-64 max-w-[80vw] -translate-x-1/2 rounded-md border border-border bg-surface-2 p-3 text-sm font-normal leading-snug text-fg shadow-xl group-focus-within:block group-hover:block"
+  >
+    <strong class="block text-accent">{entry.data.term}</strong>
+    {entry.data.short}
+  </span>
+</span>

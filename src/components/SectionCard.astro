@@ -1,0 +1,18 @@
+---
+import type { NavSection } from '../config';
+import Card from './Card.astro';
+
+export interface Props {
+  section: NavSection;
+  live: boolean;
+}
+const { section, live } = Astro.props;
+---
+
+<Card href={live ? section.href : undefined}>
+  <div class="flex items-center justify-between gap-2">
+    <h3 class="text-lg font-semibold">{section.title}</h3>
+    {!live && <span class="rounded bg-surface-2 px-2 py-0.5 text-xs uppercase tracking-wide text-muted">Soon</span>}
+  </div>
+  <p class="mt-1 text-sm text-muted">{section.blurb}</p>
+</Card>

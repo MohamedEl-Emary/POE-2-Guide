@@ -1,0 +1,21 @@
+---
+import { CURRENT_PATCH, DISCLAIMER, SITE } from '../config';
+---
+
+<footer class="mt-16 border-t border-border bg-surface" data-pagefind-ignore>
+  <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 text-sm text-muted sm:grid-cols-[2fr_1fr]">
+    <div class="space-y-3">
+      <p class="font-display text-base text-fg">{SITE.name}</p>
+      <p>{SITE.tagline}. Content is labelled for patch <strong class="text-fg">{CURRENT_PATCH}</strong> unless a page says otherwise.</p>
+      <p>{DISCLAIMER}</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul class="space-y-2">
+        <li><a class="hover:text-accent" href="/start-here/">Start here</a></li>
+        <li><a class="hover:text-accent" href="/glossary/">Glossary</a></li>
+        <li><a class="hover:text-accent" href="/search/">Search</a></li>
+        <li><a class="hover:text-accent" href="/about/">About &amp; contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>

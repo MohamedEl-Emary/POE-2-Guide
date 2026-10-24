@@ -1,0 +1,55 @@
+---
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { CURRENT_PATCH, DISCLAIMER, SITE } from '../config';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about/' },
+];
+---
+
+<BaseLayout
+  title="About this site"
+  description={`About ${SITE.name}: who writes these Path of Exile 2 guides, how pages are kept up to date between patches, and how to report a mistake.`}
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-3xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <div class="prose-site mt-6 sm:prose-lg">
+      <h1>About {SITE.name}</h1>
+      <p>
+        {SITE.name} is a beginner-first guide to Path of Exile 2. It's written for people who have never played a Path
+        of Exile game, so every term is explained in plain English or linked to the <a href="/glossary/">glossary</a>.
+      </p>
+
+      <h2>How we keep pages current</h2>
+      <p>
+        Path of Exile 2 changes a lot between patches. Every guide shows the patch it was written for and the date it was
+        last checked. The site is currently tracking patch <strong>{CURRENT_PATCH}</strong>.
+      </p>
+      <ul>
+        <li><strong>Green badge:</strong> written for the current patch and checked recently.</li>
+        <li><strong>Yellow banner:</strong> written for an older patch or being re-checked. Most of it is probably still right.</li>
+        <li><strong>Red banner:</strong> known to be outdated. It stays online for reference but isn't recommended anywhere.</li>
+      </ul>
+      <p>
+        Build ratings and tier placements are our own opinion. Prices and exchange rates are never quoted as fact; we link to
+        live price sites instead.
+      </p>
+
+      <h2>Found a mistake?</h2>
+      <p>
+        Corrections are very welcome. Please include the page address and the patch you're playing on. A contact address
+        will be listed here before launch.
+      </p>
+
+      <h2>Disclaimer</h2>
+      <p>{DISCLAIMER}</p>
+      <p>
+        All text on this site is original. We don't use the game's artwork, logos or class portraits, and we don't copy text
+        from wikis, patch notes or other guides; when another source is useful, we link to it.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

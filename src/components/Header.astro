@@ -1,0 +1,93 @@
+---
+import { NAV, SITE } from '../config';
+import { getLiveRoutes } from '../lib/content';
+import Logo from './Logo.astro';
+import NavLinkItem from './NavLinkItem.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const live = await getLiveRoutes();
+const topLinks = NAV.filter((s) => ['Start Here', 'Classes', 'Builds', 'Endgame', 'Farming'].includes(s.title));
+---
+
+<header class="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur" data-pagefind-ignore>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-fg">
+    Skip to content
+  </a>
+  <div class="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+    <a href="/" class="flex items-center gap-2 text-accent" aria-label={`${SITE.name} home`}>
+      <Logo />
+      <span class="whitespace-nowrap font-display text-lg font-semibold text-fg">{SITE.name}</span>
+    </a>
+
+    <nav aria-label="Main" class="ml-4 hidden lg:block">
+      <ul class="flex items-center gap-5 text-sm font-medium">
+        {topLinks.map((s) => (
+          <li><NavLinkItem href={s.href} label={s.title} live={live.has(s.href)} /></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="ml-auto flex items-center gap-2">
+      <a
+        href="/search/"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-muted hover:text-fg"
+        aria-label="Search"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+        </svg>
+      </a>
+      <ThemeToggle />
+      <button
+        type="button"
+        id="menu-button"
+        class="inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium hover:text-accent"
+        aria-expanded="false"
+        aria-controls="mega-menu"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+        <span class="sr-only sm:not-sr-only">All guides</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="mega-menu" class="hidden border-t border-border bg-surface shadow-2xl">
+    <nav aria-label="All guides" class="mx-auto grid max-h-[calc(100vh-4rem)] max-w-6xl gap-6 overflow-y-auto px-4 py-6 sm:grid-cols-2 lg:grid-cols-4">
+      {NAV.map((section) => (
+        <div>
+          <p class="mb-1 font-display text-base font-semibold">
+            <NavLinkItem href={section.href} label={section.title} live={live.has(section.href)} />
+          </p>
+          <p class="mb-2 text-xs text-muted">{section.blurb}</p>
+          <ul class="space-y-1.5 text-sm">
+            {section.links.filter((l) => l.href !== section.href).map((link) => (
+              <li><NavLinkItem href={link.href} label={link.label} live={live.has(link.href)} /></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const button = document.getElementById('menu-button')!;
+  const menu = document.getElementById('mega-menu')!;
+  const setOpen = (open: boolean) => {
+    menu.classList.toggle('hidden', !open);
+    button.setAttribute('aria-expanded', String(open));
+  };
+  button.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    const target = e.target as Node;
+    if (!menu.contains(target) && !button.contains(target)) setOpen(false);
+  });
+</script>

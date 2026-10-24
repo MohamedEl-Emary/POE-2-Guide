@@ -1,0 +1,109 @@
+---
+import { getCollection } from 'astro:content';
+import Card from '../components/Card.astro';
+import PatchBadge from '../components/PatchBadge.astro';
+import SectionCard from '../components/SectionCard.astro';
+import { CURRENT_PATCH, NAV, SITE } from '../config';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getLiveRoutes, getPublished, guideHref } from '../lib/content';
+import { formatDate } from '../lib/format';
+import { isRecommendable } from '../lib/patch';
+
+const live = await getLiveRoutes();
+const guides = await getPublished('guides');
+const featured = guides.filter((g) => g.data.featured && isRecommendable(g.data)).slice(0, 6);
+const patches = (await getCollection('patches')).sort((a, b) => +b.data.releaseDate - +a.data.releaseDate);
+const currentPatch = patches.find((p) => p.data.version === CURRENT_PATCH);
+const upcoming = patches.find((p) => p.data.upcoming);
+const startHere = NAV.find((s) => s.title === 'Start Here')!;
+---
+
+<BaseLayout title="Home" description={SITE.description}>
+  <section class="border-b border-border bg-[radial-gradient(ellipse_at_top,var(--surface-2),transparent_70%)]">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+      <p class="text-sm font-semibold uppercase tracking-widest text-accent">Path of Exile 2 for beginners</p>
+      <h1 class="mt-3 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">New to PoE2? Start here.</h1>
+      <p class="mt-5 max-w-2xl text-lg text-muted">
+        Clear, jargon-free guides that take you from your first character to farming the endgame. Every page shows
+        which patch it was written for, so you always know what's current.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/start-here/" class="rounded-lg bg-accent px-5 py-3 font-semibold text-accent-fg hover:bg-accent-strong">Start the beginner path</a>
+        <a href="/search/" class="rounded-lg border border-border px-5 py-3 font-semibold hover:border-accent">Search guides</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="mx-auto max-w-6xl space-y-16 px-4 py-12">
+    <section aria-labelledby="patch-status" class="grid gap-4 md:grid-cols-2">
+      <h2 id="patch-status" class="sr-only">Patch status</h2>
+      <Card>
+        <p class="text-sm text-muted">Current game version</p>
+        <p class="mt-1 font-display text-3xl font-bold">{CURRENT_PATCH}</p>
+        {currentPatch && <p class="mt-2 text-sm">{currentPatch.data.summary}</p>}
+        <p class="mt-3"><PatchBadge patch={CURRENT_PATCH} status="current" /></p>
+      </Card>
+      {upcoming && (
+        <Card>
+          <p class="text-sm text-muted">Coming next</p>
+          <p class="mt-1 font-display text-3xl font-bold">{upcoming.data.version}</p>
+          <p class="mt-2 text-sm">
+            <time datetime={upcoming.data.releaseDate.toISOString().slice(0, 10)}>{formatDate(upcoming.data.releaseDate)}</time>
+            <span id="countdown" data-date={upcoming.data.releaseDate.toISOString()} class="text-muted"></span>
+          </p>
+          <p class="mt-2 text-sm">{upcoming.data.summary}</p>
+        </Card>
+      )}
+    </section>
+
+    <section aria-labelledby="path-heading">
+      <h2 id="path-heading" class="text-2xl font-bold">The beginner path</h2>
+      <p class="mt-2 text-muted">Read these in order before your first character, or dip in as questions come up.</p>
+      <ol class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {startHere.links.map((link, i) => (
+          <li>
+            <Card href={live.has(link.href) ? link.href : undefined} class="flex h-full items-center gap-4 !p-4">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-accent font-display font-bold text-accent">{i + 1}</span>
+              <span class="font-medium">{link.label}</span>
+              {!live.has(link.href) && <span class="ml-auto text-xs uppercase text-muted">Soon</span>}
+            </Card>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    {featured.length > 0 && (
+      <section aria-labelledby="featured-heading">
+        <h2 id="featured-heading" class="text-2xl font-bold">Featured guides</h2>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((g) => (
+            <li>
+              <Card href={guideHref(g)} class="h-full">
+                <h3 class="text-lg font-semibold">{g.data.title}</h3>
+                <p class="mt-2 text-sm text-muted">{g.data.description}</p>
+                <p class="mt-3"><PatchBadge patch={g.data.patch} status={g.data.status} /></p>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section aria-labelledby="sections-heading">
+      <h2 id="sections-heading" class="text-2xl font-bold">Explore the guide</h2>
+      <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {NAV.filter((s) => s.title !== 'Start Here').map((s) => (
+          <li><SectionCard section={s} live={live.has(s.href)} /></li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  const el = document.getElementById('countdown');
+  if (el?.dataset.date) {
+    const days = Math.ceil((new Date(el.dataset.date).getTime() - Date.now()) / 86_400_000);
+    if (days > 0) el.textContent = ` · in ${days} day${days === 1 ? '' : 's'}`;
+  }
+</script>

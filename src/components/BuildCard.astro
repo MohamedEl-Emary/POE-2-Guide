@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './Card.astro';
+import PatchBadge from './PatchBadge.astro';
+import RatingBars from './RatingBars.astro';
+
+export interface Props {
+  entry: CollectionEntry<'builds'>;
+}
+const { entry } = Astro.props;
+const d = entry.data;
+const tags = [d.budget + ' budget', d.leagueStarter && 'League starter', d.ssfFriendly && 'SSF friendly'].filter(Boolean);
+---
+
+<Card href={`/builds/${entry.id}/`}>
+  <h3 class="text-lg font-semibold">{d.title}</h3>
+  <p class="mt-1 text-sm text-muted">{d.mainSkill} · {d.ascendancy.id.replace(/-/g, ' ')}</p>
+  <ul class="mt-3 flex flex-wrap gap-1.5 text-xs">
+    {tags.map((t) => <li class="rounded bg-surface-2 px-2 py-0.5 capitalize">{t}</li>)}
+  </ul>
+  <div class="mt-4"><RatingBars ratings={d.ratings} /></div>
+  <div class="mt-3"><PatchBadge patch={d.patch} status={d.status} /></div>
+</Card>

@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from 'astro:content';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('glossary')).sort((a, b) => a.data.term.localeCompare(b.data.term));
+const rendered = await Promise.all(entries.map(async (e) => ({ entry: e, Content: (await render(e)).Content })));
+const letters = [...new Set(entries.map((e) => e.data.term[0].toUpperCase()))];
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Glossary', href: '/glossary/' },
+];
+---
+
+<BaseLayout
+  title="Path of Exile 2 glossary"
+  description="An A to Z glossary of Path of Exile 2 terms for new players, from Ascendancy and Divine Orb to Waystone, SSF and Hardcore, in plain English."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-3xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Glossary</h1>
+    <p class="mt-4 text-lg text-muted">Every PoE2 term used on this site, explained in plain English.</p>
+    <nav aria-label="Jump to letter" class="mt-6 flex flex-wrap gap-2" data-pagefind-ignore>
+      {letters.map((l) => <a href={`#letter-${l}`} class="rounded border border-border px-2.5 py-1 text-sm hover:border-accent">{l}</a>)}
+    </nav>
+    <dl class="mt-8 divide-y divide-border">
+      {rendered.map(({ entry, Content }, i) => (
+        <div id={entry.id} class="scroll-mt-24 py-5">
+          {(i === 0 || entries[i - 1].data.term[0].toUpperCase() !== entry.data.term[0].toUpperCase()) && (
+            <span id={`letter-${entry.data.term[0].toUpperCase()}`} class="block scroll-mt-24"></span>
+          )}
+          <dt class="font-display text-xl font-semibold">{entry.data.term}</dt>
+          <dd class="prose-site mt-2">
+            <p class="font-medium">{entry.data.short}</p>
+            <Content />
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</BaseLayout>

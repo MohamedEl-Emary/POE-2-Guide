@@ -1,0 +1,17 @@
+---
+export interface Props {
+  type?: 'tip' | 'warning' | 'beginner';
+  title?: string;
+}
+const { type = 'tip', title } = Astro.props;
+const meta = {
+  tip: { label: 'Tip', classes: 'border-ok-border bg-ok-bg', titleClass: 'text-ok-fg' },
+  warning: { label: 'Warning', classes: 'border-warn-border bg-warn-bg', titleClass: 'text-warn-fg' },
+  beginner: { label: 'New player note', classes: 'border-info-border bg-info-bg', titleClass: 'text-info-fg' },
+}[type];
+---
+
+<aside class:list={['not-prose my-6 rounded-lg border-l-4 border px-4 py-3', meta.classes]} aria-label={title ?? meta.label}>
+  <p class:list={['mb-1 text-sm font-semibold uppercase tracking-wide', meta.titleClass]}>{title ?? meta.label}</p>
+  <div class="text-fg [&_a]:text-accent [&_a]:underline [&>p+p]:mt-2"><slot /></div>
+</aside>

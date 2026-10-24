@@ -1,0 +1,26 @@
+---
+export interface Props {
+  ratings: { clear: number; singleTarget: number; defense: number; easeOfPlay: number };
+}
+const { ratings } = Astro.props;
+const rows = [
+  ['Clear speed', ratings.clear],
+  ['Single target', ratings.singleTarget],
+  ['Defense', ratings.defense],
+  ['Ease of play', ratings.easeOfPlay],
+] as const;
+---
+
+<dl class="space-y-2 text-sm">
+  {rows.map(([label, value]) => (
+    <div class="grid grid-cols-[7.5rem_1fr] items-center gap-3">
+      <dt class="text-muted">{label}</dt>
+      <dd class="flex items-center gap-1" aria-label={`${value} out of 5`}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <span class:list={['h-2 flex-1 rounded-sm', n <= value ? 'bg-accent' : 'bg-surface-2']} aria-hidden="true" />
+        ))}
+      </dd>
+    </div>
+  ))}
+</dl>
+<p class="mt-2 text-xs text-muted">Ratings are this site's opinion.</p>

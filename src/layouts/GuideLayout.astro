@@ -1,0 +1,45 @@
+---
+import type { MarkdownHeading } from 'astro';
+import Breadcrumbs, { type Crumb } from '../components/Breadcrumbs.astro';
+import PatchBanner from '../components/PatchBanner.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import type { ContentStatus } from '../lib/patch';
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  patch: string;
+  status: ContentStatus;
+  lastVerified: Date;
+  difficulty: string;
+  draft?: boolean;
+  breadcrumbs: Crumb[];
+  headings?: MarkdownHeading[];
+}
+const { title, description, patch, status, lastVerified, difficulty, draft, breadcrumbs, headings = [] } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} breadcrumbs={breadcrumbs} article={{ dateModified: lastVerified }}>
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div class="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+      <article data-pagefind-body data-pagefind-filter={`patch:${patch}`}>
+        <header class="mb-8 space-y-4">
+          {draft && <p class="rounded bg-info-bg px-3 py-2 text-sm text-info-fg">Draft: visible in dev only, not published.</p>}
+          <h1 class="text-3xl font-bold leading-tight sm:text-4xl">{title}</h1>
+          <p class="text-lg text-muted">{description}</p>
+          <p class="text-sm capitalize text-muted" data-pagefind-ignore>Difficulty: {difficulty}</p>
+          <PatchBanner patch={patch} status={status} lastVerified={lastVerified} />
+        </header>
+        <div class="mb-8 lg:hidden"><TableOfContents headings={headings} /></div>
+        <div class="prose-site sm:prose-lg">
+          <slot />
+        </div>
+      </article>
+      <aside class="hidden lg:block">
+        <div class="sticky top-24"><TableOfContents headings={headings} /></div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

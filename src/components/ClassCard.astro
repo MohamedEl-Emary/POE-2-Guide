@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './Card.astro';
+import PatchBadge from './PatchBadge.astro';
+
+export interface Props {
+  entry: CollectionEntry<'classes'>;
+}
+const { entry } = Astro.props;
+const d = entry.data;
+const attrNames = { str: 'Strength', dex: 'Dexterity', int: 'Intelligence' } as const;
+---
+
+<Card href={`/classes/${entry.id}/`}>
+  <div class="flex items-start justify-between gap-3">
+    <h3 class="text-xl font-semibold">{d.title}</h3>
+    {d.availableFrom && <span class="rounded bg-surface-2 px-2 py-0.5 text-xs text-muted">Coming in {d.availableFrom}</span>}
+  </div>
+  <p class="mt-1 text-sm text-muted">{d.attributes.map((a) => attrNames[a]).join(' / ')} · {d.weapons.join(', ')}</p>
+  <p class="mt-3 text-sm">{d.playstyle}</p>
+  <p class="mt-3 text-sm text-muted">Beginner friendliness: <strong class="text-fg">{d.beginnerFriendly}/5</strong></p>
+  <div class="mt-3"><PatchBadge patch={d.patch} status={d.status} /></div>
+</Card>

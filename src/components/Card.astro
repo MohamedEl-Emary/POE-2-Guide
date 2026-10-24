@@ -1,0 +1,21 @@
+---
+// Generic linked card used by the class / ascendancy / build / section cards.
+export interface Props {
+  href?: string;
+  class?: string;
+}
+const { href, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  href={href}
+  class:list={[
+    'block rounded-xl border border-border bg-surface p-5 transition',
+    href && 'hover:-translate-y-0.5 hover:border-accent',
+    !href && 'opacity-80',
+    className,
+  ]}
+>
+  <slot />
+</Tag>

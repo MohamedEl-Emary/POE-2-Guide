@@ -1,0 +1,22 @@
+---
+export interface Props {
+  href: string;
+  label: string;
+  live: boolean;
+  class?: string;
+}
+const { href, label, live, class: className = '' } = Astro.props;
+const current = Astro.url.pathname === href;
+---
+
+{
+  live ? (
+    <a href={href} class:list={['hover:text-accent', current && 'text-accent', className]} aria-current={current ? 'page' : undefined}>
+      {label}
+    </a>
+  ) : (
+    <span class:list={['cursor-default text-muted', className]}>
+      {label} <span class="ml-1 rounded bg-surface-2 px-1.5 py-0.5 text-[0.7rem] uppercase tracking-wide">Soon</span>
+    </span>
+  )
+}

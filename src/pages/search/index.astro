@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Search" description="Search every Path of Exile 2 beginner guide on this site, including classes, builds, campaign, endgame, farming, crafting and the glossary." noindex>
+  <div class="mx-auto max-w-3xl px-4 py-8">
+    <h1 class="text-3xl font-bold">Search the guide</h1>
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+    <div id="search" class="mt-6"></div>
+    <noscript><p class="mt-6 text-muted">Search needs JavaScript. Try the <a class="text-accent underline" href="/start-here/">Start Here</a> page instead.</p></noscript>
+    <p id="search-unavailable" class="mt-6 hidden text-muted">
+      Search is built when the site is built, so it isn't available in <code>pnpm dev</code>. Run <code>pnpm build &amp;&amp; pnpm preview</code> to try it.
+    </p>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var s = document.createElement('script');
+    s.src = '/pagefind/pagefind-ui.js';
+    s.onload = function () {
+      var ui = new PagefindUI({ element: '#search', showSubResults: true, resetStyles: false });
+      var q = new URLSearchParams(location.search).get('q');
+      if (q) ui.triggerSearch(q);
+    };
+    s.onerror = function () {
+      document.getElementById('search-unavailable').classList.remove('hidden');
+    };
+    document.head.appendChild(s);
+  })();
+</script>

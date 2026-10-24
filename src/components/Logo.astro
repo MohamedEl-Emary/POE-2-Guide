@@ -1,0 +1,13 @@
+---
+// Original mark: a faceted gem inside a ring. Not derived from any game asset.
+export interface Props {
+  class?: string;
+}
+const { class: className = 'h-8 w-8' } = Astro.props;
+---
+
+<svg viewBox="0 0 32 32" class={className} aria-hidden="true" fill="none">
+  <circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="1.5" opacity="0.55"></circle>
+  <path d="M16 5 25 14 16 27 7 14Z" fill="currentColor" opacity="0.25"></path>
+  <path d="M16 5 25 14 16 27 7 14Z M7 14h18 M16 5l-4 9 4 13 4-13Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+</svg>
