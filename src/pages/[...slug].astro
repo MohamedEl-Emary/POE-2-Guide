@@ -1,10 +1,8 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
-import Callout from '../components/Callout.astro';
-import GlossaryTerm from '../components/GlossaryTerm.astro';
 import { NAV } from '../config';
 import GuideLayout from '../layouts/GuideLayout.astro';
-import { getPublished, guideHref } from '../lib/content';
+import { Callout, getPublished, GlossaryTerm, guideHref } from '../lib/content';
 
 export async function getStaticPaths() {
   const guides = await getPublished('guides');

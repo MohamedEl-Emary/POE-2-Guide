@@ -130,7 +130,7 @@ html.light {
 }
 
 /* Wide tables scroll inside the article instead of widening the page. */
-.prose-site table {
+.prose-site > table {
   display: block;
   overflow-x: auto;
 }

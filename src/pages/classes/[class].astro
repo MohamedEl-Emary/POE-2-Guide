@@ -1,0 +1,76 @@
+---
+import { getEntries, render, type CollectionEntry } from 'astro:content';
+import AscendancyCard from '../../components/AscendancyCard.astro';
+import BuildCard from '../../components/BuildCard.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { ATTRIBUTE_NAMES, Callout, getPublished, GlossaryTerm } from '../../lib/content';
+import { isRecommendable } from '../../lib/patch';
+
+export async function getStaticPaths() {
+  const classes = await getPublished('classes');
+  const ascendancies = await getPublished('ascendancies');
+  for (const c of classes) {
+    const declared = c.data.ascendancies.map((r) => r.id).sort();
+    const actual = ascendancies.filter((a) => a.data.class.id === c.id).map((a) => a.id).sort();
+    if (declared.join() !== actual.join()) {
+      throw new Error(`Class "${c.id}" lists ascendancies [${declared}] but these point back to it: [${actual}]`);
+    }
+  }
+  return classes.map((entry) => ({ params: { class: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<'classes'> };
+const d = entry.data;
+const { Content, headings } = await render(entry);
+const ascendancies = await getEntries(d.ascendancies);
+const builds = (await getPublished('builds')).filter((b) => b.data.class.id === entry.id && isRecommendable(b.data));
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Classes', href: '/classes/' },
+  { label: d.title, href: `/classes/${entry.id}/` },
+];
+const extraHeadings = [
+  ...(ascendancies.length ? [{ depth: 2, slug: 'ascendancies', text: 'Ascendancies compared' }] : []),
+  { depth: 2, slug: 'builds', text: 'Builds' },
+];
+---
+
+<GuideLayout {...d} breadcrumbs={breadcrumbs} headings={[...headings, ...extraHeadings]}>
+  <dl slot="summary" class="mb-8 grid gap-4 rounded-xl border border-border bg-surface p-5 text-sm sm:grid-cols-3">
+    <div><dt class="text-muted">Attributes</dt><dd class="mt-1 font-semibold">{d.attributes.map((a) => ATTRIBUTE_NAMES[a]).join(' / ') || 'Not announced'}</dd></div>
+    <div><dt class="text-muted">Weapons</dt><dd class="mt-1 font-semibold">{d.weapons.join(', ')}</dd></div>
+    <div><dt class="text-muted">Beginner friendly</dt><dd class="mt-1 font-semibold">{d.beginnerFriendly ? `${d.beginnerFriendly}/5 (our opinion)` : 'Not rated yet'}</dd></div>
+  </dl>
+
+  <Content components={{ Callout, GlossaryTerm }} />
+
+  {ascendancies.length > 0 && (
+    <>
+      <h2 id="ascendancies">Ascendancies compared</h2>
+      <div class="not-prose overflow-x-auto rounded-lg border border-border">
+        <table class="w-full min-w-[30rem] text-left text-sm">
+          <thead class="bg-surface-2"><tr><th class="p-3">Ascendancy</th><th class="p-3">Best for</th><th class="p-3">Added in</th></tr></thead>
+          <tbody>
+            {ascendancies.map((a) => (
+              <tr class="border-t border-border">
+                <td class="p-3"><a class="text-accent hover:underline" href={`/ascendancies/${a.id}/`}>{a.data.title}</a></td>
+                <td class="p-3">{a.data.bestFor.join(', ')}</td>
+                <td class="p-3">{a.data.addedInPatch}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul class="not-prose mt-6 grid gap-4 sm:grid-cols-2">
+        {ascendancies.map((a) => <li><AscendancyCard entry={a} /></li>)}
+      </ul>
+    </>
+  )}
+
+  <h2 id="builds">Builds</h2>
+  {builds.length > 0 ? (
+    <ul class="not-prose grid gap-4 sm:grid-cols-2">{builds.map((b) => <li><BuildCard entry={b} /></li>)}</ul>
+  ) : (
+    <p>Build guides for the {d.title} are being written and will appear here.</p>
+  )}
+</GuideLayout>

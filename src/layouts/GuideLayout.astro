@@ -32,6 +32,7 @@ const { title, description, patch, status, lastVerified, difficulty, draft, brea
           <p class="text-sm capitalize text-muted" data-pagefind-ignore>Difficulty: {difficulty}</p>
           <PatchBanner patch={patch} status={status} lastVerified={lastVerified} />
         </header>
+        <slot name="summary" />
         <div class="mb-8 lg:hidden"><TableOfContents headings={headings} /></div>
         <div class="prose-site sm:prose-lg">
           <slot />

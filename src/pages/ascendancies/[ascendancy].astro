@@ -1,0 +1,56 @@
+---
+import { getEntry, render, type CollectionEntry } from 'astro:content';
+import BuildCard from '../../components/BuildCard.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { Callout, getPublished, GlossaryTerm } from '../../lib/content';
+import { isRecommendable } from '../../lib/patch';
+
+export async function getStaticPaths() {
+  const ascendancies = await getPublished('ascendancies');
+  return ascendancies.map((entry) => ({ params: { ascendancy: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<'ascendancies'> };
+const d = entry.data;
+const cls = await getEntry(d.class);
+const { Content, headings } = await render(entry);
+const builds = (await getPublished('builds')).filter((b) => b.data.ascendancy.id === entry.id && isRecommendable(b.data));
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Classes', href: '/classes/' },
+  { label: cls.data.title, href: `/classes/${cls.id}/` },
+  { label: d.title, href: `/ascendancies/${entry.id}/` },
+];
+const allHeadings = [
+  ...(d.keyNodes.length ? [{ depth: 2, slug: 'signature-mechanics', text: 'Signature mechanics' }] : []),
+  ...headings,
+  { depth: 2, slug: 'builds', text: 'Builds' },
+];
+---
+
+<GuideLayout {...d} breadcrumbs={breadcrumbs} headings={allHeadings}>
+  <dl slot="summary" class="mb-8 grid gap-4 rounded-xl border border-border bg-surface p-5 text-sm sm:grid-cols-3">
+    <div><dt class="text-muted">Class</dt><dd class="mt-1 font-semibold"><a class="text-accent hover:underline" href={`/classes/${cls.id}/`}>{cls.data.title}</a></dd></div>
+    <div><dt class="text-muted">Best for</dt><dd class="mt-1 font-semibold">{d.bestFor.join(', ')}</dd></div>
+    <div><dt class="text-muted">Added in patch</dt><dd class="mt-1 font-semibold">{d.addedInPatch}</dd></div>
+  </dl>
+
+  {d.keyNodes.length > 0 && (
+    <>
+      <h2 id="signature-mechanics">Signature mechanics</h2>
+      <dl>
+        {d.keyNodes.map((n) => (<><dt>{n.name}</dt><dd>{n.summary}</dd></>))}
+      </dl>
+      <p class="text-sm">These are summaries in our own words. Exact numbers change between patches, so check the in-game Ascendancy tree before you commit points.</p>
+    </>
+  )}
+
+  <Content components={{ Callout, GlossaryTerm }} />
+
+  <h2 id="builds">Builds</h2>
+  {builds.length > 0 ? (
+    <ul class="not-prose grid gap-4 sm:grid-cols-2">{builds.map((b) => <li><BuildCard entry={b} /></li>)}</ul>
+  ) : (
+    <p>Build guides for the {d.title} are being written and will appear here.</p>
+  )}
+</GuideLayout>

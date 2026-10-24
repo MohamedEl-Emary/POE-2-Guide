@@ -34,7 +34,10 @@ const classes = defineCollection({
     weapons: z.array(z.string()).min(1),
     ascendancies: z.array(reference('ascendancies')).default([]),
     playstyle: z.string(),
-    beginnerFriendly: rating,
+    /** Site opinion, 1-5. Leave out for classes that aren't playable yet. */
+    beginnerFriendly: rating.optional(),
+    /** Position in the class grid. */
+    order: z.number().int().default(100),
     /** Set for classes that aren't playable yet (e.g. Duelist before 1.0). */
     availableFrom: version.optional(),
   }),

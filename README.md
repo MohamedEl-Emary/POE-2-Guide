@@ -1,8 +1,7 @@
-# Exile Primer: a beginner guide to Path of Exile 2
+# Exile Mentor: a beginner guide to Path of Exile 2
 
 Static guide site built with Astro, Tailwind CSS, MDX and Pagefind. No server, no database: all content is Markdown/MDX in `src/content/`.
 
-> The site name "Exile Primer" is a placeholder. Change it in `src/config.ts` (`SITE.name`).
 
 ## Requirements
 
@@ -29,7 +28,9 @@ src/
   config.ts            CURRENT_PATCH, site name, navigation (NAV)
   content.config.ts    Collections + Zod schemas (build fails on bad frontmatter)
   content/
-    classes/ ascendancies/ builds/   (filled in Phase 2-3)
+    classes/           One file per class (file name = URL slug)
+    ascendancies/      One file per Ascendancy; `class` must match a class file
+    builds/            (Phase 3)
     guides/            Guide pages; the folder path becomes the URL
     glossary/          One file per term
     patches/           One file per game patch
@@ -38,7 +39,8 @@ src/
   components/          PatchBadge, PatchBanner, Callout, GlossaryTerm, TableOfContents,
                        Breadcrumbs, ClassCard, AscendancyCard, BuildCard, RatingBars, Header, Footer...
   layouts/             BaseLayout (SEO head, header, footer), GuideLayout (banner + ToC)
-  pages/               index, start-here/, about, glossary/, search/, 404, robots.txt,
+  pages/               index, start-here/, about, glossary/, search/, patches/, 404, robots.txt,
+                       classes/ (index + [class]), ascendancies/[ascendancy],
                        [...slug].astro (renders every entry in content/guides)
 ```
 
@@ -74,6 +76,12 @@ Components available in every guide without importing:
 A `GlossaryTerm` pointing at a missing glossary entry fails the build.
 
 Navigation links in `src/config.ts` that don't have a page yet show a "Soon" label instead of a broken link. They become real links automatically once the page exists.
+
+## Classes and Ascendancies
+
+Each class lists its Ascendancies in `ascendancies:` and each Ascendancy points back with `class:`. The build fails if the two disagree, so a missing or misspelled Ascendancy can't slip through. Ascendancy `keyNodes` are shown as "Signature mechanics"; keep them as summaries in our own words.
+
+For the Duelist at 1.0: fill in `attributes`, `beginnerFriendly` and `ascendancies`, remove `availableFrom`, and add one file per new Ascendancy.
 
 ## Adding a build (Phase 3)
 

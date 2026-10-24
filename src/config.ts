@@ -8,7 +8,7 @@
 export const CURRENT_PATCH = '0.5.5';
 
 export const SITE = {
-  name: 'Exile Primer',
+  name: 'Exile Mentor',
   tagline: 'A beginner-first guide to Path of Exile 2',
   description:
     'Plain-English Path of Exile 2 guides for new players: classes, leveling, builds, farming, crafting and the Atlas endgame, labelled by patch.',
@@ -55,7 +55,18 @@ export const NAV: NavSection[] = [
     title: 'Classes',
     href: '/classes/',
     blurb: 'Every class and Ascendancy, compared.',
-    links: [{ label: 'All classes', href: '/classes/' }],
+    links: [
+      { label: 'All classes', href: '/classes/' },
+      { label: 'Warrior', href: '/classes/warrior/' },
+      { label: 'Sorceress', href: '/classes/sorceress/' },
+      { label: 'Witch', href: '/classes/witch/' },
+      { label: 'Ranger', href: '/classes/ranger/' },
+      { label: 'Monk', href: '/classes/monk/' },
+      { label: 'Mercenary', href: '/classes/mercenary/' },
+      { label: 'Huntress', href: '/classes/huntress/' },
+      { label: 'Druid', href: '/classes/druid/' },
+      { label: 'Duelist', href: '/classes/duelist/' },
+    ],
   },
   {
     title: 'Builds',
@@ -88,6 +99,12 @@ export const NAV: NavSection[] = [
       { label: 'Masters of the Atlas', href: '/endgame/masters-of-the-atlas/' },
       { label: 'Bosses', href: '/endgame/bosses/' },
       { label: 'Progression checklist', href: '/endgame/progression-checklist/' },
+      { label: 'Breach', href: '/endgame/mechanics/breach/' },
+      { label: 'Delirium', href: '/endgame/mechanics/delirium/' },
+      { label: 'Expedition', href: '/endgame/mechanics/expedition/' },
+      { label: 'Ritual', href: '/endgame/mechanics/ritual/' },
+      { label: 'Abyss', href: '/endgame/mechanics/abyss/' },
+      { label: 'Trial of Chaos', href: '/endgame/mechanics/trial-of-chaos/' },
     ],
   },
   {
@@ -95,7 +112,7 @@ export const NAV: NavSection[] = [
     href: '/farming/',
     blurb: 'How currency really works, and how to earn it.',
     links: [
-      { label: 'Farming hub', href: '/farming/' },
+      { label: 'How currency works', href: '/farming/' },
       { label: 'Beginner farming', href: '/farming/beginner-farming/' },
     ],
   },

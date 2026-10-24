@@ -1,0 +1,60 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Callout from '../../components/Callout.astro';
+import ClassCard from '../../components/ClassCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ATTRIBUTE_NAMES, getPublished } from '../../lib/content';
+
+const classes = (await getPublished('classes')).sort((a, b) => a.data.order - b.data.order);
+const ascendancies = await getPublished('ascendancies');
+const ascCount = (id: string) => ascendancies.filter((a) => a.data.class.id === id).length;
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Classes', href: '/classes/' },
+];
+---
+
+<BaseLayout
+  title="Path of Exile 2 classes"
+  description="Every Path of Exile 2 class compared for new players: attributes, weapons, play style, Ascendancies and how beginner friendly each one is, in plain English."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-6xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Classes</h1>
+    <p class="mt-4 max-w-3xl text-lg text-muted">
+      Your class decides your starting weapon, your starting spot on the passive tree and which Ascendancies you can pick.
+      It doesn't lock you out of any skill, so think of it as your character's home turf rather than a cage.
+    </p>
+    <div class="max-w-3xl">
+      <Callout type="beginner">
+        <p>Not sure where to start? Read <a href="/start-here/choosing-a-class/">Choosing a class</a> first. It compares them side by side.</p>
+      </Callout>
+    </div>
+
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {classes.map((c) => <li><ClassCard entry={c} /></li>)}
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">At a glance</h2>
+    <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+      <table class="w-full min-w-[36rem] text-left text-sm">
+        <thead class="bg-surface-2">
+          <tr><th class="p-3">Class</th><th class="p-3">Attributes</th><th class="p-3">Main weapons</th><th class="p-3">Ascendancies</th><th class="p-3">Beginner friendly</th></tr>
+        </thead>
+        <tbody>
+          {classes.map((c) => (
+            <tr class="border-t border-border">
+              <td class="p-3"><a class="text-accent hover:underline" href={`/classes/${c.id}/`}>{c.data.title}</a></td>
+              <td class="p-3">{c.data.attributes.map((a) => ATTRIBUTE_NAMES[a]).join(' / ') || 'TBA'}</td>
+              <td class="p-3">{c.data.weapons.join(', ')}</td>
+              <td class="p-3">{ascCount(c.id) || 'TBA'}</td>
+              <td class="p-3">{c.data.beginnerFriendly ? `${c.data.beginnerFriendly}/5` : 'TBA'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-xs text-muted">Beginner ratings are this site's opinion.</p>
+  </div>
+</BaseLayout>

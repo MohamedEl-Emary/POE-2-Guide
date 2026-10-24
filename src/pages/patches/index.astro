@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { CURRENT_PATCH } from '../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, isoDate } from '../../lib/format';
+import { compareVersions } from '../../lib/patch';
+
+const patches = (await getCollection('patches')).sort((a, b) => compareVersions(b.data.version, a.data.version));
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Patch history', href: '/patches/' },
+];
+---
+
+<BaseLayout
+  title="Patch history for new players"
+  description="Path of Exile 2 patch history summarised for new players: what each major update changed, which leagues it started, and what's coming at the 1.0 launch."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-3xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Patch history</h1>
+    <p class="mt-4 text-lg text-muted">
+      What each recent update changed, from a new player's point of view. This site currently tracks patch <strong class="text-fg">{CURRENT_PATCH}</strong>.
+      For the full details, read the official patch notes linked from our <a class="text-accent underline" href="/tools/">tools page</a>.
+    </p>
+    <ol class="mt-8 space-y-4">
+      {patches.map((p) => (
+        <li class="rounded-xl border border-border bg-surface p-5" id={`v${p.data.version}`}>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-xl font-semibold">{p.data.title}</h2>
+            {p.data.version === CURRENT_PATCH && <span class="rounded-full border border-ok-border bg-ok-bg px-2 py-0.5 text-xs text-ok-fg">Current</span>}
+            {p.data.upcoming && <span class="rounded-full border border-info-border bg-info-bg px-2 py-0.5 text-xs text-info-fg">Upcoming</span>}
+          </div>
+          <p class="mt-1 text-sm text-muted">
+            <time datetime={isoDate(p.data.releaseDate)}>{formatDate(p.data.releaseDate)}</time>{p.data.league && ` · ${p.data.league}`}
+          </p>
+          <p class="mt-3">{p.data.summary}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</BaseLayout>
