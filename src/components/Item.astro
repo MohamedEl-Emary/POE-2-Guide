@@ -1,0 +1,21 @@
+---
+// Inline item mention for guides: small icon + name in its rarity colour,
+// with the game-style tooltip on hover, focus or tap. In MDX: <Item name="Divine Orb" />
+import { getItemIcon, rarityOf, tooltipKey } from '../lib/items';
+
+export interface Props {
+  /** Exact in-game name. */
+  name: string;
+  unique?: boolean;
+}
+const { name, unique = false } = Astro.props;
+const icon = getItemIcon(name, unique);
+---
+
+<button type="button" class={`item-ref item-ref-${rarityOf(name, unique)}`} data-item={tooltipKey(name, unique)}><img
+    src={icon.i}
+    alt=""
+    loading="lazy"
+    decoding="async"
+    referrerpolicy="no-referrer"
+  /><slot>{name}</slot></button>

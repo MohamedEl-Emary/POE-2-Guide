@@ -1,0 +1,81 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ItemIcon from '../../components/ItemIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import descriptions from '../../data/item-descriptions.json';
+import { ICON_CREDIT, itemsInCategory, STATS_CREDIT } from '../../lib/items';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Item gallery', href: '/items/' },
+  { label: 'Currency and crafting items', href: '/items/currency/' },
+];
+
+const currency = itemsInCategory('Currency').map(([n]) => n);
+const orbs = Object.keys(descriptions.currency).filter((n) => currency.includes(n));
+const essences = currency.filter((n) => n.includes('Essence of'));
+const catalysts = currency.filter((n) => n.endsWith('Catalyst'));
+const omens = itemsInCategory('Omen').map(([n]) => n);
+const runes = itemsInCategory('SoulCore').map(([n]) => n);
+const shown = new Set([...orbs, ...essences, ...catalysts]);
+const other = currency.filter((n) => !shown.has(n));
+
+const GROUPS = [
+  { id: 'orbs', title: 'Crafting orbs and quality items', blurb: 'The everyday currency. Read what each one does on the currency guide.', names: orbs, captions: true },
+  { id: 'essences', title: 'Essences', blurb: 'Each one guarantees a specific modifier. The tooltip lists what it adds to each kind of item.', names: essences },
+  { id: 'omens', title: 'Omens', blurb: 'Keep one in your inventory and it changes the next matching currency you use.', names: omens },
+  { id: 'catalysts', title: 'Catalysts', blurb: 'Quality for rings and amulets (or jewels, for Refined ones) that boosts one kind of modifier.', names: catalysts },
+  { id: 'runes', title: 'Runes, soul cores and talismans', blurb: 'Socket them into equipment. The tooltip shows the bonus for each kind of item.', names: runes },
+  { id: 'other', title: 'Everything else', blurb: 'League mechanic currency: Abyss bones, Delirium liquids, splinters, alloys and more.', names: other },
+];
+const total = GROUPS.reduce((n, g) => n + g.names.length, 0);
+---
+
+<BaseLayout
+  title="Currency and crafting items"
+  description={`All ${total} Path of Exile 2 currency and crafting items by picture: orbs, essences, omens, catalysts, runes and soul cores, each with a game-style tooltip.`}
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div data-pagefind-body>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Currency and crafting items</h1>
+      <p class="mt-4 max-w-3xl text-lg text-muted">
+        All {total} currency and crafting items in the game. Hover, tap or tab to any of them to see its tooltip. New to
+        crafting? Start with <a class="text-accent underline" href="/crafting/currency/">Every currency item explained</a>.
+      </p>
+      <nav class="mt-4 flex flex-wrap gap-2 text-sm" aria-label="Jump to">
+        {GROUPS.map((g) => <a class="rounded-full border border-border bg-surface px-3 py-1 hover:border-accent" href={`#${g.id}`}>{g.title} ({g.names.length})</a>)}
+      </nav>
+
+      {
+        GROUPS.map((g) => (
+          <section id={g.id} class="mt-10 scroll-mt-20">
+            <h2 class="text-2xl font-bold">{g.title}</h2>
+            <p class="mt-1 text-muted">{g.blurb}</p>
+            {g.captions ? (
+              <ul class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                {g.names.map((name) => (
+                  <li class="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
+                    <ItemIcon name={name} size={48} />
+                    <span class="text-sm font-semibold leading-tight">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul class="mt-4 flex flex-wrap gap-2">
+                {g.names.map((name) => (
+                  <li>
+                    <ItemIcon name={name} size={56} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))
+      }
+    </div>
+
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} {STATS_CREDIT}</p>
+  </div>
+</BaseLayout>

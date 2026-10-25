@@ -1,7 +1,8 @@
 ---
 // An item's official icon on a dark inventory-style tile. The image loads from
-// GGG's CDN; see scripts/build-item-icons.mjs.
-import { getItemIcon } from '../lib/items';
+// GGG's CDN; see scripts/build-item-icons.mjs. Hovering, focusing or tapping
+// the tile shows the item's tooltip (src/scripts/item-tooltip.ts).
+import { getItemIcon, tooltipKey } from '../lib/items';
 
 export interface Props {
   /** Exact in-game name, e.g. "Divine Orb" or "Headhunter". */
@@ -9,30 +10,34 @@ export interface Props {
   unique?: boolean;
   /** Tile size in pixels. */
   size?: number;
-  /** Hide the name from screen readers when it's already written next to the icon. */
-  decorative?: boolean;
+  /** Set false when a parent element already opens the tooltip. */
+  tooltip?: boolean;
   class?: string;
 }
-const { name, unique = false, size = 56, decorative = false, class: className = '' } = Astro.props;
+const { name, unique = false, size = 56, tooltip = true, class: className = '' } = Astro.props;
 const icon = getItemIcon(name, unique);
 // Fit the item's cell shape (1×1 orbs, 2×4 armour) inside the square tile.
 const scale = (size * 0.86) / Math.max(icon.w, icon.h);
+const Tag = tooltip ? 'button' : 'span';
 ---
 
-<span
-  class:list={['item-tile inline-grid shrink-0 place-items-center rounded-md', unique && 'item-tile-unique', className]}
+<Tag
+  type={tooltip ? 'button' : undefined}
+  data-item={tooltip ? tooltipKey(name, unique) : undefined}
+  aria-label={tooltip ? name : undefined}
+  class:list={['item-tile inline-grid shrink-0 place-items-center rounded-md', unique && 'item-tile-unique', tooltip && 'item-tile-button', className]}
   style={`width:${size}px;height:${size}px`}
 >
   <img
     src={icon.i}
-    alt={decorative ? '' : name}
+    alt=""
     width={Math.round(icon.w * scale)}
     height={Math.round(icon.h * scale)}
     loading="lazy"
     decoding="async"
     referrerpolicy="no-referrer"
   />
-</span>
+</Tag>
 
 <style is:global>
   .item-tile {
@@ -43,6 +48,13 @@ const scale = (size * 0.86) / Math.max(icon.w, icon.h);
   .item-tile-unique {
     border-color: #7a4a1d;
     background: radial-gradient(circle at 50% 40%, #3a2614, #110e0b 75%);
+  }
+  .item-tile-button {
+    cursor: help;
+  }
+  .item-tile-button:hover,
+  .item-tile-button:focus-visible {
+    border-color: var(--accent);
   }
   .item-tile img {
     object-fit: contain;

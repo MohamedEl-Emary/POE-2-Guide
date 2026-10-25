@@ -144,3 +144,77 @@ html.light {
   --pagefind-ui-tag: var(--surface-2);
   --pagefind-ui-font: var(--font-sans);
 }
+
+/* ---- Item tooltips (src/scripts/item-tooltip.ts) ----
+   Always dark, like the game, in both site themes. */
+#item-tooltip {
+  position: absolute;
+  z-index: 60;
+  max-width: min(26rem, calc(100vw - 16px));
+  pointer-events: none;
+}
+.itt {
+  --itt-accent: #c8c8c8;
+  --itt-head: #2a2622;
+  background: #0b0907;
+  border: 1px solid var(--itt-accent);
+  color: #c8c8c8;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 10px 30px #000a;
+}
+.itt-unique { --itt-accent: #af6025; --itt-head: #2b1a0e; }
+.itt-currency { --itt-accent: #aa9e82; --itt-head: #24211a; }
+.itt-gem { --itt-accent: #1ba29b; --itt-head: #0d2524; }
+.itt-head {
+  padding: 0.35rem 1rem;
+  background: linear-gradient(180deg, var(--itt-head), #0b0907);
+  border-bottom: 1px solid var(--itt-accent);
+}
+.itt-name {
+  color: var(--itt-accent);
+  font-size: 1.05rem;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+}
+.itt-unique .itt-name { color: #e0954a; }
+.itt-section { padding: 0.4rem 0.9rem; }
+.itt-section + .itt-section {
+  border-top: 1px solid color-mix(in srgb, var(--itt-accent) 45%, transparent);
+}
+.itt-class { color: #7f7f7f; }
+.itt-label { color: #7f7f7f; }
+.itt-value { color: #f2f2f2; }
+.itt-mod { color: #8888ff; }
+.itt-left { text-align: left; }
+.itt-slot { color: #a3a3ff; font-weight: 600; }
+.itt-flavour { color: #af6025; font-style: italic; }
+.itt-corrupted { color: #d20000; }
+
+/* Inline item mentions (Item.astro) and icon tiles that open a tooltip. */
+.item-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  vertical-align: -0.2em;
+  font: inherit;
+  font-weight: 600;
+  cursor: help;
+  border-bottom: 1px dotted currentColor;
+  line-height: 1.2;
+}
+.item-ref img {
+  width: 1.25em;
+  height: 1.25em;
+  object-fit: contain;
+  margin: 0;
+}
+.item-ref-unique { color: #c06a1e; }
+.item-ref-currency { color: #6e5f38; }
+.item-ref-normal { color: var(--fg); }
+.item-ref-gem { color: #13857f; }
+:root:not(.light) .item-ref-unique { color: #e0954a; }
+:root:not(.light) .item-ref-currency { color: #c9b98f; }
+:root:not(.light) .item-ref-gem { color: #3fc3b2; }

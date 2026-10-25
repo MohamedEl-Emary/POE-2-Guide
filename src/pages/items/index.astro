@@ -4,7 +4,7 @@ import Callout from '../../components/Callout.astro';
 import GlossaryTerm from '../../components/GlossaryTerm.astro';
 import ItemIcon from '../../components/ItemIcon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { ICON_CREDIT, itemsInCategory } from '../../lib/items';
+import { ICON_CREDIT, itemsInCategory, STATS_CREDIT } from '../../lib/items';
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -103,13 +103,14 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
       <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Item gallery</h1>
       <p class="mt-4 max-w-3xl text-lg text-muted">
         What every kind of item looks like in game, so you can recognise loot on the ground. Each row shows a spread of
-        the base types for that slot, from early levelling bases to endgame ones. Hover or long-press an icon to see its name.
+        the base types for that slot, from early levelling bases to endgame ones. Hover, tap or tab to any icon to see its stats the way the game shows them.
       </p>
       <div class="max-w-3xl">
         <Callout type="beginner">
           <p>
             Want the crafting orbs? They're on <a href="/crafting/currency/">Every currency item explained</a>. Looking for a
-            specific unique? Browse the <a href="/items/uniques/">unique items gallery</a>.
+            specific unique? Browse the <a href="/items/uniques/">unique items gallery</a>. Every essence, omen, rune and
+            other crafting item is on <a href="/items/currency/">Currency and crafting items</a>.
           </p>
         </Callout>
       </div>
@@ -125,7 +126,7 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
                 {slot.categories
                   .flatMap((c) => sample(c, slot.categories.length > 1 ? 5 : 8))
                   .map((name) => (
-                    <li title={name}>
+                    <li>
                       <ItemIcon name={name} size={56} />
                     </li>
                   ))}
@@ -144,7 +145,7 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
               <p class="mt-1 text-sm text-muted">{group.blurb}</p>
               <ul class="mt-3 flex flex-wrap gap-2">
                 {group.names.map((name) => (
-                  <li title={name}>
+                  <li>
                     <ItemIcon name={name} size={56} />
                   </li>
                 ))}
@@ -155,6 +156,6 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
       </div>
     </div>
 
-    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT}</p>
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} {STATS_CREDIT}</p>
   </div>
 </BaseLayout>

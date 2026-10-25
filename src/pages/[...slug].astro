@@ -2,7 +2,7 @@
 import { render, type CollectionEntry } from 'astro:content';
 import { NAV } from '../config';
 import GuideLayout from '../layouts/GuideLayout.astro';
-import { Callout, CurrencyGrid, getPublished, GlossaryTerm, guideHref, ItemIcon } from '../lib/content';
+import { Callout, CurrencyGrid, getPublished, GlossaryTerm, guideHref, Item, ItemIcon } from '../lib/content';
 
 export async function getStaticPaths() {
   const guides = await getPublished('guides');
@@ -25,5 +25,5 @@ const breadcrumbs = [
 ---
 
 <GuideLayout {...entry.data} breadcrumbs={breadcrumbs} headings={headings}>
-  <Content components={{ Callout, CurrencyGrid, GlossaryTerm, ItemIcon }} />
+  <Content components={{ Callout, CurrencyGrid, GlossaryTerm, Item, ItemIcon }} />
 </GuideLayout>

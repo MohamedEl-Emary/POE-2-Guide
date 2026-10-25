@@ -2,7 +2,7 @@
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ItemIcon from '../../components/ItemIcon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { allUniques, ICON_CREDIT } from '../../lib/items';
+import { allUniques, ICON_CREDIT, STATS_CREDIT, tooltipKey } from '../../lib/items';
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -16,7 +16,7 @@ const chip = 'rounded-full border border-border bg-surface px-3 py-1 text-sm hov
 
 <BaseLayout
   title="Unique items gallery"
-  description={`Browse all ${uniques.length} Path of Exile 2 unique items by picture. Filter by slot, search by name or base type, and open any unique on poe2db for its full stats.`}
+  description={`Browse all ${uniques.length} Path of Exile 2 unique items by picture. Filter by slot, search by name or base type, and see each unique's stats in a tooltip like the game's.`}
   breadcrumbs={breadcrumbs}
 >
   <div class="mx-auto max-w-6xl px-4 py-8">
@@ -25,8 +25,8 @@ const chip = 'rounded-full border border-border bg-surface px-3 py-1 text-sm hov
       <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Unique items</h1>
       <p class="mt-4 max-w-3xl text-lg text-muted">
         Uniques are orange-named items with fixed, often build-defining effects. Here are all {uniques.length} of them by
-        picture. Select one to read its full stats on poe2db, and check poe.ninja before you buy one, because prices
-        swing a lot.
+        picture. Hover, tap or tab to one to see its stats the way the game shows them, and check poe.ninja before you
+        buy one, because prices swing a lot.
       </p>
     </div>
 
@@ -49,29 +49,34 @@ const chip = 'rounded-full border border-border bg-surface px-3 py-1 text-sm hov
       <ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {
           uniques.map(([name, u]) => (
-            <li data-item data-group={u.c} data-text={`${name} ${u.b}`.toLowerCase()}>
-              <a
-                href={`https://poe2db.tw/us/${encodeURIComponent(name.replaceAll("'", '').replaceAll(' ', '_'))}`}
-                class="flex h-full flex-col items-center gap-2 rounded-xl border border-border bg-surface p-3 text-center transition hover:-translate-y-0.5 hover:border-accent"
+            <li data-card data-group={u.c} data-text={`${name} ${u.b}`.toLowerCase()} class="flex flex-col rounded-xl border border-border bg-surface transition hover:-translate-y-0.5 hover:border-accent">
+              <button
+                type="button"
+                data-item={tooltipKey(name, true)}
+                class="flex flex-1 cursor-help flex-col items-center gap-2 p-3 pb-1 text-center"
               >
-                <ItemIcon name={name} unique size={96} decorative />
+                <ItemIcon name={name} unique size={96} tooltip={false} />
                 <span class="text-sm font-semibold leading-tight text-[#e0954a] light:text-[#9a4f0c]">{name}</span>
                 <span class="text-xs text-muted">{u.b}</span>
-              </a>
+              </button>
+              <a
+                class="pb-3 text-center text-xs text-accent underline"
+                href={`https://poe2db.tw/us/${encodeURIComponent(name.replaceAll("'", '').replaceAll(' ', '_'))}`}
+              >poe2db<span class="sr-only"> page for {name}</span></a>
             </li>
           ))
         }
       </ul>
     </div>
 
-    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} Unique stats live on poe2db, which we link to rather than copy.</p>
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} {STATS_CREDIT}</p>
   </div>
 </BaseLayout>
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-uniques]');
   if (root) {
-    const cards = [...root.querySelectorAll<HTMLElement>('[data-item]')];
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-card]')];
     const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-group]')];
     const search = root.querySelector<HTMLInputElement>('[data-search]')!;
     const count = root.querySelector<HTMLElement>('[data-count]')!;
