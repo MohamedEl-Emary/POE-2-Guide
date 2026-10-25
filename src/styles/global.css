@@ -168,6 +168,8 @@ html.light {
 .itt-unique { --itt-accent: #af6025; --itt-head: #2b1a0e; }
 .itt-currency { --itt-accent: #aa9e82; --itt-head: #24211a; }
 .itt-gem { --itt-accent: #1ba29b; --itt-head: #0d2524; }
+/* Gem descriptions are plain text in game; their stats stay blue. */
+.itt-gem .itt-desc { color: #c8c8c8; }
 .itt-head {
   padding: 0.35rem 1rem;
   background: linear-gradient(180deg, var(--itt-head), #0b0907);

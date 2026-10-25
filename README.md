@@ -99,7 +99,7 @@ Create `src/content/builds/<slug>.mdx` using the build fields in `src/content.co
 
 Any element with `data-item="<name>"` (or `data-item="u:<name>"` for a unique) shows a game-style tooltip on hover, keyboard focus or tap. `<ItemIcon>` tiles do this automatically, and `<Item name="Divine Orb" />` adds an inline mention with icon and tooltip to any MDX guide. The script is `src/scripts/item-tooltip.ts`, loaded on every page; it fetches `public/data/item-tooltips.json` the first time someone opens a tooltip.
 
-That file is generated. Unique mods, base stats, flavour text, essence and rune effects are game data read from [Path of Building PoE2](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2)'s data files (last built from commit `bb52d6b`). Currency, omen and catalyst descriptions are our own wording in `src/data/item-descriptions.json`; edit that file to add or fix one. To rebuild after a patch:
+That file is generated. Unique mods, base stats, flavour text, essence, rune and liquid emotion effects, and skill gem stats (translated through PoB's stat description files by `scripts/lib/stat-text.mjs`) are game data read from [Path of Building PoE2](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2)'s data files (last built from commit `bb52d6b`). Currency, omen, catalyst and league item descriptions (Abyss bones, splinters, Expedition artifacts and so on) are our own wording in `src/data/item-descriptions.json`; edit that file to add or fix one. To rebuild after a patch:
 
 ```sh
 git clone --depth 1 https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2 /tmp/pob

@@ -1,8 +1,9 @@
 // Builds public/data/item-tooltips.json, the data behind the game-style item
 // tooltips. Stats are game data (c) Grinding Gear Games, read from Path of
 // Building's data files (MIT): unique mods, base item stats, flavour text,
-// essence and rune effects. Currency, omen and catalyst descriptions are our
-// own words, from src/data/item-descriptions.json.
+// essence, rune and liquid emotion effects, and skill gem stats. Currency,
+// omen, catalyst and league item descriptions are our own words, from
+// src/data/item-descriptions.json.
 //
 // Usage:
 //   git clone --depth 1 https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2 /tmp/pob
@@ -12,6 +13,7 @@
 
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { parseReturnTable, parseTableAt } from './lib/lua-table.mjs';
+import { statTranslator } from './lib/stat-text.mjs';
 
 const dataDir = process.argv[2];
 if (!dataDir) throw new Error('Pass the path to Path of Building PoE2 src/Data');
@@ -211,6 +213,11 @@ for (const [name, slots] of Object.entries(parseReturnTable(await read('ModRunes
 
 // ---- Currency, omens, catalysts and other items ----------------------------
 
+const RARITY_OF = {
+  Currency: 'currency', Omen: 'currency', SoulCore: 'currency', UncutSkillGem: 'gem',
+  'Active Skill Gem': 'gem', 'Support Skill Gem': 'gem', MetaSkillGem: 'gem',
+};
+
 const currencyLike = (name, lines) => {
   if (!tooltips[name] && icons.items[name]) tooltips[name] = { r: 'currency', n: name, d: lines };
 };
@@ -236,10 +243,137 @@ for (const [name, item] of Object.entries(icons.items)) {
   }
 }
 
+// Delirium liquid emotions add a jewel modifier that depends on the jewel type.
+const jewelMods = parseReturnTable(await read('ModJewel.lua'));
+const jewelModText = (id) => {
+  const mod = jewelMods[id];
+  if (!mod) return undefined;
+  const trade = mod.nodeType ? Object.values(mod.tradeHashes ?? {})[0]?.[0] : undefined;
+  return trade || mod._list?.join('\n');
+};
+for (const liquid of Object.values(parseReturnTable(await read('LiquidEmotions.lua')))) {
+  if (!icons.items[liquid.name] || tooltips[liquid.name]) continue;
+  const slots = Object.entries(liquid.mods).flatMap(([jewel, affixes]) =>
+    Object.values(affixes).map((id) => [jewel, jewelModText(id)]),
+  );
+  tooltips[liquid.name] = {
+    r: 'currency',
+    n: liquid.name,
+    d: [liquid.radiusJewel ? words.ancientLiquid : words.liquid],
+    g: groupBySlot(slots),
+  };
+}
+
+// League items described in our own words, matched by name.
+for (const name of Object.keys(icons.items)) {
+  const match = words.patterns.find(([pattern]) => new RegExp(pattern).test(name));
+  if (!match || tooltips[name]) continue;
+  const bone = name.match(/(Jawbone|Rib|Collarbone|Cranium|Vertebrae)$/)?.[1];
+  const text = match[1].replace('{slot}', words.boneSlots[bone] ?? 'item');
+  tooltips[name] = { r: RARITY_OF[icons.items[name].c] ?? 'normal', n: name, d: [text] };
+}
+
+// ---- Skill, spirit and support gems ----------------------------------------
+
+/** Offset of `key = {` directly inside the table that opens at `start`, or -1. */
+function fieldOffset(src, start, key) {
+  let depth = 0;
+  const pattern = new RegExp(`^(?:${key}|\\[${key}\\])\\s*=\\s*\\{`);
+  for (let i = start; i < src.length; i++) {
+    const c = src[i];
+    if (c === '"') {
+      i = src.indexOf('"', i + 1);
+      while (src[i - 1] === '\\') i = src.indexOf('"', i + 1);
+    } else if (c === '{') depth++;
+    else if (c === '}') {
+      if (--depth === 0) return -1;
+    } else if (depth === 1 && pattern.test(src.slice(i, i + key.length + 8))) {
+      return src.indexOf('{', i);
+    }
+  }
+  return -1;
+}
+const field = (src, start, key) => {
+  const at = fieldOffset(src, start, key);
+  return at < 0 ? undefined : parseTableAt(src, at).value;
+};
+
+const skills = {};
+for (const file of await readdir(`${dataDir}/Skills`)) {
+  if (!file.endsWith('.lua')) continue;
+  const src = await read(`Skills/${file}`);
+  for (const m of src.matchAll(/^skills\["(\w+)"\] = \{/gm)) {
+    const start = m.index + m[0].length - 1;
+    const head = src.slice(start, start + 4000);
+    const levels = field(src, start, 'levels');
+    const sets = fieldOffset(src, start, 'statSets');
+    const set = sets < 0 ? -1 : fieldOffset(src, sets, '1');
+    skills[m[1]] = {
+      description: head.match(/^\tdescription = "((?:[^"\\]|\\.)*)"/m)?.[1].replace(/\\(.)/g, (_, c) => (c === 'n' ? ' ' : c)),
+      castTime: Number(head.match(/^\tcastTime = ([\d.]+)/m)?.[1]) || undefined,
+      level: levels?.[1] ?? levels?.[0],
+      scope: set < 0 ? undefined : src.slice(set, set + 3000).match(/statDescriptionScope = "([^"]+)"/)?.[1],
+      constantStats: set < 0 ? [] : Object.values(field(src, set, 'constantStats') ?? {}),
+      stats: set < 0 ? [] : Object.values(field(src, set, 'stats') ?? {}),
+      setLevel: set < 0 ? undefined : field(src, set, 'levels')?.[1],
+    };
+  }
+}
+
+const translate = statTranslator(`${dataDir}/StatDescriptions`);
+
+/** The game lines for a granted effect at gem level 1. */
+async function skillLines(skill) {
+  const stats = {};
+  for (const entry of skill.constantStats) {
+    const [id, value] = Object.values(entry);
+    stats[id] = value;
+  }
+  const values = skill.setLevel?._list ?? (Array.isArray(skill.setLevel) ? skill.setLevel : []);
+  skill.stats.forEach((id, i) => (stats[id] = i < values.length ? values[i] : 1));
+  return translate(skill.scope ?? 'skill_stat_descriptions', stats);
+}
+
+const gems = Object.values(parseReturnTable(await read('Gems.lua')));
+const GEM_CLASS = { Support: 'Support Gem', Spirit: 'Spirit Gem' };
+for (const gem of gems) {
+  const icon = icons.items[gem.name];
+  if (!icon || !/Gem$/.test(icon.c) || tooltips[gem.name]) continue;
+  const skill = skills[gem.grantedEffectId];
+  if (!skill) continue;
+  const support = gem.gemType === 'Support';
+  const p = [];
+  if (gem.Tier) p.push(['Tier', String(gem.Tier)]);
+  if (!support) p.push(['Level', '1']);
+  const lvl = skill.level ?? {};
+  for (const [resource, amount] of Object.entries(lvl.cost ?? {})) {
+    if (/PerMinute$/.test(resource)) p.push(['Cost', `${fixed(amount / 60, 1).replace(/\.0$/, '')} ${resource.replace('PerMinute', '')} per second`]);
+    else p.push(['Cost', `${amount} ${resource}`]);
+  }
+  if (lvl.spiritReservationFlat) p.push(['Reservation', `${lvl.spiritReservationFlat} Spirit`]);
+  if (lvl.cooldown) p.push(['Cooldown Time', `${fixed(lvl.cooldown)} sec`]);
+  if (skill.castTime && !gem.tags?.attack && !support) p.push(['Cast Time', `${fixed(skill.castTime)} sec`]);
+  if (lvl.attackSpeedMultiplier) p.push(['Attack Speed', `${100 + lvl.attackSpeedMultiplier}% of base`]);
+  if (lvl.critChance) p.push(['Critical Hit Chance', `${fixed(lvl.critChance)}%`]);
+  if (lvl.baseMultiplier) p.push(['Attack Damage', `${Math.round(lvl.baseMultiplier * 100)}% of base`]);
+  if (gem.weaponRequirements) p.push(['Requires', gem.weaponRequirements]);
+  if (lvl.manaMultiplier && support) p.push(['Cost & Reservation Multiplier', `${100 + lvl.manaMultiplier}%`]);
+
+  const extra = gem.additionalGrantedEffectId1 ? skills[gem.additionalGrantedEffectId1] : undefined;
+  const lines = [...(await skillLines(skill)), ...(extra ? await skillLines(extra) : [])];
+  tooltips[gem.name] = {
+    r: 'gem',
+    n: gem.name,
+    c: [GEM_CLASS[gem.gemType] ?? null, gem.tagString].filter(Boolean).join(', ') || undefined,
+    p,
+    d: skill.description ? [skill.description] : undefined,
+    m: lines.length ? [...new Set(lines)] : undefined,
+  };
+}
+
 // Every other item with an icon still gets a name card, so no icon on the site is a dead trigger.
-const RARITY = { Currency: 'currency', Omen: 'currency', SoulCore: 'currency', UncutSkillGem: 'gem' };
 for (const [name, item] of Object.entries(icons.items)) {
-  tooltips[name] ??= { r: RARITY[item.c] ?? 'normal', n: name };
+  tooltips[name] ??= { r: RARITY_OF[item.c] ?? 'normal', n: name };
 }
 
 await writeFile(OUT, JSON.stringify(tooltips));

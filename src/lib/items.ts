@@ -46,6 +46,6 @@ export function rarityOf(name: string, unique = false): Rarity {
   if (unique) return 'unique';
   const c = getItemIcon(name).c;
   if (CURRENCY_CATEGORIES.has(c)) return 'currency';
-  if (c === 'UncutSkillGem') return 'gem';
+  if (c === 'UncutSkillGem' || c.endsWith('Gem')) return 'gem';
   return 'normal';
 }
