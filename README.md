@@ -198,4 +198,5 @@ Evergreen pages flag too. That's intentional: they become green again once someo
 
 - Original words only. Summarise and link; never copy from wikis, patch notes or other guides.
 - No Grinding Gear Games art, logos or class portraits stored in the repo. Item icons are the one exception to using their art: they're hotlinked from GGG's CDN (`<ItemIcon name="Divine Orb" />`), never downloaded or committed. Mohamed approved this in October 2026.
+- The site logo (`public/logo.*`, favicons, `scripts/og-logo.png`) is an image Mohamed supplied in October 2026, styled after the Path of Exile logo. To replace it, overwrite those files at the same sizes (header logo 117x96, favicons 32/48/180/512 square, share-image logo 243x200).
 - Never state exchange rates or exact profits as fact. Give ranges and link to poe.ninja.

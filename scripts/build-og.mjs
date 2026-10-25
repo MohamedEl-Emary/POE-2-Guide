@@ -17,6 +17,7 @@ const fonts = [
 ];
 
 const DIST = 'dist';
+const logo = `data:image/png;base64,${readFileSync(new URL('./og-logo.png', import.meta.url)).toString('base64')}`;
 const decode = (s) =>
   s.replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n)).replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
     .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -44,7 +45,10 @@ function card({ title, description, section, site }) {
       h('div', { display: 'flex', marginTop: 28, fontSize: 30, lineHeight: 1.4, color: '#b9b0a3' }, description),
     ]),
     h('div', { display: 'flex', position: 'absolute', left: 72, bottom: 56, width: 1056, justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 28 }, [
-      h('div', { display: 'flex', fontFamily: 'Display', fontSize: 40, color: '#f2c879' }, site),
+      h('div', { display: 'flex', alignItems: 'center', gap: 20 }, [
+        { type: 'img', props: { src: logo, height: 100, width: 122 } },
+        h('div', { display: 'flex', fontFamily: 'Display', fontSize: 40, color: '#f2c879' }, site),
+      ]),
       h('div', { display: 'flex', color: '#8f877b' }, 'A beginner guide to Path of Exile 2'),
     ]),
   ]);
