@@ -19,7 +19,23 @@ Static guide site built with Astro, Tailwind CSS, MDX and Pagefind. No server, n
 
 Set `SITE_URL` (e.g. `https://example.com`) in your host's build environment so canonical URLs, the sitemap and `robots.txt` use the real domain.
 
-Deploy: any static host. Build command `pnpm build`, output directory `dist`.
+## Deploying
+
+The site is fully static, so any static host works. We recommend **Cloudflare Pages** (free, fast, reads `public/_headers` for caching). Netlify and Vercel work the same way.
+
+1. Push this repo to GitHub (done).
+2. In Cloudflare: Workers & Pages → Create → Pages → Connect to Git → pick `POE-2-Guide`.
+3. Settings:
+   - Build command: `pnpm build`
+   - Output directory: `dist`
+   - Environment variables: `NODE_VERSION` = `24`, `PNPM_VERSION` = `11`, and `SITE_URL` = your real address (e.g. `https://exilementor.com`).
+4. Deploy. Every push to `main` redeploys; pull requests get preview links.
+5. Add your custom domain under the project's Custom domains tab, then update `SITE_URL` to match and redeploy.
+6. Submit `https://<your-domain>/sitemap-index.xml` in [Google Search Console](https://search.google.com/search-console) so Google indexes the site before 1.0.
+
+`.github/workflows/build.yml` runs the same build on every pull request, so a broken page shows up as a failed check before it's merged.
+
+Each page gets a generated 1200x630 share image (`scripts/build-og.mjs`, run by `pnpm build`): text only, made from the page title, description and section.
 
 ## Project layout
 
@@ -30,17 +46,19 @@ src/
   content/
     classes/           One file per class (file name = URL slug)
     ascendancies/      One file per Ascendancy; `class` must match a class file
-    builds/            (Phase 3)
+    builds/            One file per build guide (file name = URL slug)
     guides/            Guide pages; the folder path becomes the URL
     glossary/          One file per term
     patches/           One file per game patch
   lib/patch.ts         Patch-freshness logic
   lib/content.ts       Draft filtering, guide URLs, "which routes exist"
   components/          PatchBadge, PatchBanner, Callout, GlossaryTerm, TableOfContents,
-                       Breadcrumbs, ClassCard, AscendancyCard, BuildCard, RatingBars, Header, Footer...
+                       Breadcrumbs, ClassCard, AscendancyCard, BuildCard, RatingBars, GemSetup,
+                       ProgressChecklist, Header, Footer...
   layouts/             BaseLayout (SEO head, header, footer), GuideLayout (banner + ToC)
   pages/               index, start-here/, about, glossary/, search/, patches/, 404, robots.txt,
                        classes/ (index + [class]), ascendancies/[ascendancy],
+                       builds/ (index with filters, tier-list, [build]),
                        [...slug].astro (renders every entry in content/guides)
 ```
 
@@ -71,6 +89,8 @@ Components available in every guide without importing:
 <Callout type="tip">...</Callout>            {/* tip | warning | beginner, optional title="..." */}
 <GlossaryTerm id="divine-orb" />             {/* uses the term's name */}
 <GlossaryTerm id="skill-gem">skill gems</GlossaryTerm>
+<Item name="Divine Orb" />  <ItemIcon name="Headhunter" unique />   {/* game icon + tooltip */}
+<GemSetup gems={[...]} />  <ProgressChecklist id="..." groups={[...]} />
 ```
 
 A `GlossaryTerm` pointing at a missing glossary entry fails the build.
@@ -83,9 +103,50 @@ Each class lists its Ascendancies in `ascendancies:` and each Ascendancy points 
 
 For the Duelist at 1.0: fill in `attributes`, `beginnerFriendly` and `ascendancies`, remove `availableFrom`, and add one file per new Ascendancy.
 
-## Adding a build (Phase 3)
+## Adding a build
 
-Create `src/content/builds/<slug>.mdx` using the build fields in `src/content.config.ts` (`class`, `ascendancy`, `mainSkill`, `budget`, `leagueStarter`, `ssfFriendly`, `ratings`, `pobLink`, `leveling`). `class` and `ascendancy` must match file names in `content/classes/` and `content/ascendancies/`, or the build fails.
+Create `src/content/builds/<slug>.mdx`. It appears at `/builds/<slug>/`, in the filterable `/builds/` list, on the tier list, and on its class and Ascendancy pages.
+
+```yaml
+---
+title: Ice Shot Deadeye
+description: 140-160 characters.
+patch: "0.5.5"
+lastVerified: 2026-10-25
+status: current
+difficulty: beginner
+class: ranger                # file name in content/classes/
+ascendancy: deadeye          # file name in content/ascendancies/ (must belong to `class`)
+mainSkill: Ice Shot
+budget: starter              # starter | low | medium | high
+leagueStarter: true
+ssfFriendly: true
+playstyle: ranged            # melee | ranged | caster | minion (used by the filter)
+tier: S                      # S | A | B | C, our opinion, shown on the tier list
+ratings: { clear: 4, singleTarget: 4, defense: 3, easeOfPlay: 5 }   # 1-5
+leveling: true               # the guide includes a leveling section
+farms: [breach, expedition]  # file names in content/guides/farming/
+pobLink: https://pobb.in/... # optional
+---
+```
+
+The build fails if the Ascendancy doesn't belong to the class or a `farms` entry has no farming guide. Write the body with the 12 headings used in the existing builds (Summary, Pros and cons, How the build works, Leveling, Ascendancy order, Passive tree, Gems, Gear, Defenses, Playstyle, Atlas and farming pairing, Common mistakes). Gem tables use:
+
+```mdx
+<GemSetup gems={[
+  { skill: 'Ice Shot', supports: ['Elemental Armament II', 'Fork'], note: 'Main skill' },
+]} />
+```
+
+Gem names found in the item data get an icon and tooltip; unknown names (such as Lineage supports) show as plain text. To retire a build, set `status: outdated`: it stays online with a red banner but leaves the tier list.
+
+## Farming strategies
+
+Farming strategy pages live in `src/content/guides/farming/` with `section: farming`, and follow the 8 headings in the existing pages (Summary, Why it makes money, Requirements, Setup, In-map execution, What to pick up and sell, Budget vs full version, Risks). Never write exchange rates or exact profits; link poe.ninja.
+
+## Interactive checklist
+
+`<ProgressChecklist id="..." groups={[...]} />` (see `guides/endgame/progression-checklist.mdx`) saves ticks in the visitor's browser. Change its `id` when the content changes a lot (for example at 1.0) so old ticks don't carry over.
 
 ## Updating the passive tree
 
@@ -123,7 +184,9 @@ node scripts/build-item-tooltips.mjs /tmp/pob/src/Data
 2. In `src/content/patches/1-0.md`, set `upcoming: false`.
 3. Regenerate the passive tree (see above) once GGG publishes the 1.0 export.
 4. Re-verify pages one by one. When a page is accurate for 1.0, set `patch: "1.0"` and update `lastVerified`. Mark pages you know are wrong `status: outdated`.
-5. Add the Duelist and its Ascendancies, and rewrite the leveling guide for six Acts.
+5. Add the Duelist and its Ascendancies, and rewrite the campaign section (`guides/campaign/`) for six Acts.
+6. Re-check every build, the tier list and the farming pages. Builds that no longer work: `status: outdated`.
+7. Give the progression checklist a new `id` (e.g. `endgame-1.0`) and update its steps.
 
 Evergreen pages flag too. That's intentional: they become green again once someone has checked them.
 

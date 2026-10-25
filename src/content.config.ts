@@ -70,6 +70,12 @@ const builds = defineCollection({
     }),
     pobLink: z.url().optional(),
     leveling: z.boolean(),
+    /** How the build plays, used by the builds filter. */
+    playstyle: z.enum(['melee', 'ranged', 'caster', 'minion']),
+    /** Tier list placement (this site's opinion). */
+    tier: z.enum(['S', 'A', 'B', 'C']),
+    /** Farming strategies (file names in content/guides/farming) that suit this build. */
+    farms: z.array(z.string()).default([]),
   }),
 });
 

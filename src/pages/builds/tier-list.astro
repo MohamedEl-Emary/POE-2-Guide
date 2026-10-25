@@ -1,0 +1,75 @@
+---
+import { getEntry } from 'astro:content';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Callout from '../../components/Callout.astro';
+import PatchBadge from '../../components/PatchBadge.astro';
+import { CURRENT_PATCH } from '../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished } from '../../lib/content';
+import { isRecommendable } from '../../lib/patch';
+
+const builds = (await getPublished('builds')).filter((b) => isRecommendable(b.data));
+const rows = await Promise.all(
+  builds.map(async (b) => ({ entry: b, asc: (await getEntry(b.data.ascendancy)).data.title })),
+);
+const tiers = [
+  { tier: 'S', blurb: 'Excellent at everything. Safe to pick without second thoughts.' },
+  { tier: 'A', blurb: 'Very strong, with a small weakness such as cost or complexity.' },
+  { tier: 'B', blurb: 'Good builds that need more gear or skill to shine.' },
+  { tier: 'C', blurb: 'Playable and fun, but behind the others this patch.' },
+] as const;
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Builds', href: '/builds/' },
+  { label: 'Tier list', href: '/builds/tier-list/' },
+];
+---
+
+<BaseLayout
+  title={`Build tier list for ${CURRENT_PATCH}`}
+  description={`Our Path of Exile 2 build tier list for patch ${CURRENT_PATCH}, ranked for new players by safety, cost and how well each build handles mapping and bosses.`}
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-4xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Build tier list</h1>
+    <p class="mt-4 text-lg text-muted">
+      Ranked for new players: we weigh how safe, cheap and easy each build is as much as raw power. It's generated from our build guides,
+      so it always matches them. Builds marked outdated are left off.
+    </p>
+    <Callout type="beginner" title="This is our opinion">
+      <p>Tier lists are opinions, not facts. A B-tier build you enjoy will get you further than an S-tier build you find boring. For what players are actually using right now, check poe.ninja's build statistics.</p>
+    </Callout>
+
+    <div class="mt-8 space-y-6">
+      {tiers.map(({ tier, blurb }) => {
+        const inTier = rows.filter((r) => r.entry.data.tier === tier).sort((a, b) => a.entry.data.title.localeCompare(b.entry.data.title));
+        return (
+          <section aria-labelledby={`tier-${tier}`} class="grid gap-4 rounded-xl border border-border bg-surface p-4 sm:grid-cols-[5rem_1fr]">
+            <div>
+              <h2 id={`tier-${tier}`} class="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-accent font-display text-3xl font-bold text-accent">
+                <span class="sr-only">Tier </span>{tier}
+              </h2>
+            </div>
+            <div>
+              <p class="text-sm text-muted">{blurb}</p>
+              {inTier.length > 0 ? (
+                <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                  {inTier.map(({ entry, asc }) => (
+                    <li class="rounded-lg border border-border bg-bg p-3">
+                      <a href={`/builds/${entry.id}/`} class="font-semibold text-accent hover:underline">{entry.data.title}</a>
+                      <p class="text-xs text-muted">{asc} · {entry.data.budget} budget{entry.data.leagueStarter && ' · league starter'}</p>
+                      <p class="mt-1.5"><PatchBadge patch={entry.data.patch} status={entry.data.status} /></p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="mt-3 text-sm text-muted">No builds in this tier.</p>
+              )}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>

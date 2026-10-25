@@ -1,0 +1,39 @@
+---
+// Skill gem table for build guides. Names found in the game's item data get an
+// icon and tooltip; anything else (e.g. a Lineage support missing from the data)
+// falls back to plain text, so a build never fails because of a gem name.
+import data from '../data/item-icons.json';
+import Item from './Item.astro';
+
+export interface GemGroup {
+  skill: string;
+  supports: string[];
+  note?: string;
+}
+export interface Props {
+  gems: GemGroup[];
+}
+const { gems } = Astro.props;
+const known = (name: string) => name in (data.items as Record<string, unknown>);
+---
+
+<div class="not-prose my-6 overflow-x-auto rounded-lg border border-border">
+  <table class="w-full min-w-[34rem] text-left text-sm">
+    <thead class="bg-surface-2">
+      <tr><th class="p-3">Skill</th><th class="p-3">Supports</th><th class="p-3">Use</th></tr>
+    </thead>
+    <tbody>
+      {gems.map((g) => (
+        <tr class="border-t border-border align-top">
+          <td class="p-3 font-medium">{known(g.skill) ? <Item name={g.skill} /> : g.skill}</td>
+          <td class="p-3">
+            <ul class="flex flex-wrap gap-x-3 gap-y-1">
+              {g.supports.map((s) => <li>{known(s) ? <Item name={s} /> : s}</li>)}
+            </ul>
+          </td>
+          <td class="p-3 text-muted">{g.note}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
