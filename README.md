@@ -156,6 +156,10 @@ Farming strategy pages live in `src/content/guides/farming/` with `section: farm
 
 `<ItemIcon name="..." />` (and `unique` for uniques) shows an item's official icon, loaded from GGG's CDN. It can be used in any MDX file without importing it. Names must match the game exactly; a typo fails the build. The name → URL list lives in `src/data/item-icons.json` and is regenerated with `node scripts/build-item-icons.mjs`, which reads the item data from [Exiled Exchange 2](https://github.com/Kvan7/Exiled-Exchange-2) (MIT). Bump `SOURCE_REF` in that script to a newer release after a big patch.
 
+## Item list pages
+
+`/items/<slug>/` pages (skill, spirit and support gems, weapons, armour, jewellery, flasks/charms/jewels, endgame items) list every item of a kind with search and filter chips. They are defined in `src/lib/item-lists.ts` and rendered by `src/components/ItemDatabase.astro`; add a list there and it gets a page and a card on the item gallery. Gem filters come from `src/data/gem-info.json`, which `scripts/build-item-tooltips.mjs` writes.
+
 ## Item tooltips
 
 Any element with `data-item="<name>"` (or `data-item="u:<name>"` for a unique) shows a game-style tooltip on hover, keyboard focus or tap. `<ItemIcon>` tiles do this automatically, and `<Item name="Divine Orb" />` adds an inline mention with icon and tooltip to any MDX guide. The script is `src/scripts/item-tooltip.ts`, loaded on every page; it fetches `public/data/item-tooltips.json` the first time someone opens a tooltip.

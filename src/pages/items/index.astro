@@ -4,7 +4,8 @@ import Callout from '../../components/Callout.astro';
 import GlossaryTerm from '../../components/GlossaryTerm.astro';
 import ItemIcon from '../../components/ItemIcon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { ICON_CREDIT, itemsInCategory, STATS_CREDIT } from '../../lib/items';
+import { ITEM_LISTS } from '../../lib/item-lists';
+import { allUniques, ICON_CREDIT, itemsInCategory, STATS_CREDIT } from '../../lib/items';
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -18,83 +19,98 @@ function sample(category: string, count = 8): string[] {
   return Array.from({ length: count }, (_, i) => names[Math.floor((i * names.length) / count)]);
 }
 
-const SLOTS: { title: string; blurb: string; categories: string[] }[] = [
-  { title: 'Maces', blurb: 'Heavy hitting weapons for the Warrior. One-handed or two-handed.', categories: ['One Hand Mace', 'Two Hand Mace'] },
-  { title: 'Quarterstaves', blurb: 'Fast two-handed staves for the Monk.', categories: ['Warstaff'] },
-  { title: 'Spears', blurb: 'The Huntress weapon: melee stabs and thrown attacks.', categories: ['Spear'] },
-  { title: 'Swords', blurb: 'The Duelist weapon.', categories: ['One Hand Sword'] },
-  { title: 'Bows', blurb: 'Ranged attacks for the Ranger. Paired with a quiver.', categories: ['Bow'] },
-  { title: 'Crossbows', blurb: 'Ranged weapons with different ammunition, used by the Mercenary.', categories: ['Crossbow'] },
-  { title: 'Wands', blurb: 'One-handed caster weapons that also grant a spell.', categories: ['Wand'] },
-  { title: 'Staves', blurb: 'Two-handed caster weapons.', categories: ['Staff'] },
-  { title: 'Sceptres', blurb: 'One-handed weapons that give Spirit and a skill that buffs you or your minions.', categories: ['Sceptre'] },
-  { title: 'Talismans', blurb: 'Two-handed weapons for the Druid’s shapeshifting.', categories: ['Talisman'] },
-  { title: 'Shields and bucklers', blurb: 'Off-hands that let you block. Bucklers are the lighter, faster kind.', categories: ['Shield', 'Buckler'] },
-  { title: 'Foci and quivers', blurb: 'Off-hands for casters (focus) and bow users (quiver).', categories: ['Focus', 'Quiver'] },
-  { title: 'Helmets', blurb: 'Head armour.', categories: ['Helmet'] },
-  { title: 'Body armour', blurb: 'Your biggest source of armour, evasion or energy shield.', categories: ['Body Armour'] },
-  { title: 'Gloves', blurb: 'Hand armour.', categories: ['Gloves'] },
-  { title: 'Boots', blurb: 'Foot armour. Movement speed on boots is a big deal while levelling.', categories: ['Boots'] },
-  { title: 'Rings and amulets', blurb: 'Jewellery. You wear two rings and one amulet.', categories: ['Ring', 'Amulet'] },
-  { title: 'Belts', blurb: 'Belts hold your charms.', categories: ['Belt'] },
-  { title: 'Flasks and charms', blurb: 'Flasks refill life and mana. Charms trigger automatically to save you.', categories: ['Flask', 'Charm'] },
+const SLOTS: { title: string; blurb: string; categories: string[]; all: string }[] = [
+  { title: 'Maces', blurb: 'Heavy hitting weapons for the Warrior. One-handed or two-handed.', categories: ['One Hand Mace', 'Two Hand Mace'], all: 'weapons' },
+  { title: 'Quarterstaves', blurb: 'Fast two-handed staves for the Monk.', categories: ['Warstaff'], all: 'weapons' },
+  { title: 'Spears', blurb: 'The Huntress weapon: melee stabs and thrown attacks.', categories: ['Spear'], all: 'weapons' },
+  { title: 'Swords', blurb: 'The Duelist weapon.', categories: ['One Hand Sword'], all: 'weapons' },
+  { title: 'Bows', blurb: 'Ranged attacks for the Ranger. Paired with a quiver.', categories: ['Bow'], all: 'weapons' },
+  { title: 'Crossbows', blurb: 'Ranged weapons with different ammunition, used by the Mercenary.', categories: ['Crossbow'], all: 'weapons' },
+  { title: 'Wands', blurb: 'One-handed caster weapons that also grant a spell.', categories: ['Wand'], all: 'weapons' },
+  { title: 'Staves', blurb: 'Two-handed caster weapons.', categories: ['Staff'], all: 'weapons' },
+  { title: 'Sceptres', blurb: 'One-handed weapons that give Spirit and a skill that buffs you or your minions.', categories: ['Sceptre'], all: 'weapons' },
+  { title: 'Talismans', blurb: 'Two-handed weapons for the Druid’s shapeshifting.', categories: ['Talisman'], all: 'weapons' },
+  { title: 'Shields and bucklers', blurb: 'Off-hands that let you block. Bucklers are the lighter, faster kind.', categories: ['Shield', 'Buckler'], all: 'armour' },
+  { title: 'Foci and quivers', blurb: 'Off-hands for casters (focus) and bow users (quiver).', categories: ['Focus', 'Quiver'], all: 'armour' },
+  { title: 'Helmets', blurb: 'Head armour.', categories: ['Helmet'], all: 'armour' },
+  { title: 'Body armour', blurb: 'Your biggest source of armour, evasion or energy shield.', categories: ['Body Armour'], all: 'armour' },
+  { title: 'Gloves', blurb: 'Hand armour.', categories: ['Gloves'], all: 'armour' },
+  { title: 'Boots', blurb: 'Foot armour. Movement speed on boots is a big deal while levelling.', categories: ['Boots'], all: 'armour' },
+  { title: 'Rings and amulets', blurb: 'Jewellery. You wear two rings and one amulet.', categories: ['Ring', 'Amulet'], all: 'jewellery' },
+  { title: 'Belts', blurb: 'Belts hold your charms.', categories: ['Belt'], all: 'jewellery' },
+  { title: 'Flasks and charms', blurb: 'Flasks refill life and mana. Charms trigger automatically to save you.', categories: ['Flask', 'Charm'], all: 'flasks-charms-jewels' },
 ];
 
-const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[] = [
+const ENDGAME: { title: string; blurb: string; term?: string; names: string[]; all: string }[] = [
   {
     title: 'Waystones',
+    all: '/items/endgame/',
     blurb: 'Keys that open maps on the Atlas. Higher tiers are harder and drop more.',
     term: 'waystone',
     names: [1, 3, 5, 7, 9, 11, 13, 15, 16].map((t) => `Waystone (Tier ${t})`),
   },
   {
     title: 'Precursor tablets',
+    all: '/items/endgame/',
     blurb: 'Placed in towers to add a mechanic to nearby maps.',
     term: 'precursor-tablet',
     names: itemsInCategory('TowerAugment').map(([n]) => n),
   },
   {
     title: 'Skill and support gems',
+    all: '/items/skill-gems/',
     blurb: 'What uncut gems become. Hover one to see its cost, tags and level 1 stats.',
     term: 'skill-gem',
     names: ['Fireball', 'Spark', 'Ice Nova', 'Leap Slam', 'Lightning Arrow', 'Raging Spirits', 'Cast on Critical', 'Multishot I'],
   },
   {
     title: 'Uncut gems',
+    all: '/items/endgame/',
     blurb: 'You cut these into the skill, spirit or support gem of your choice.',
     term: 'uncut-gem',
     names: ['Uncut Skill Gem', 'Uncut Spirit Gem', 'Uncut Support Gem'],
   },
   {
     title: 'Jewels',
+    all: '/items/flasks-charms-jewels/',
     blurb: 'Socketed into the passive tree for extra stats.',
     term: 'jewel',
     names: itemsInCategory('Jewel').map(([n]) => n),
   },
   {
     title: 'Essences',
+    all: '/items/currency/#essences',
     blurb: 'Crafting items that add one guaranteed modifier.',
     term: 'essence',
     names: ['Essence of Flames', 'Essence of Ice', 'Essence of Electricity', 'Essence of the Body', 'Essence of the Mind', 'Essence of Haste', 'Essence of Battle', 'Essence of Sorcery'],
   },
   {
     title: 'Omens',
+    all: '/items/currency/#omens',
     blurb: 'Change what your next currency use does, for more controlled crafting.',
     term: 'omen',
     names: ['Omen of Light', 'Omen of Sinistral Exaltation', 'Omen of Dextral Exaltation', 'Omen of Whittling', 'Omen of Greater Annulment', 'Omen of Corruption', 'Omen of Sinistral Annulment', 'Omen of Dextral Coronation'],
   },
   {
     title: 'Runes',
+    all: '/items/currency/#runes',
     blurb: 'Put into socketed equipment for a fixed bonus.',
     term: 'rune',
     names: ['Body Rune', 'Charging Rune', 'Adept Rune', 'Ancient Rune of the Titan', 'Ancient Rune of Prowess', 'Ancient Rune of Discovery'],
   },
   {
     title: 'Catalysts',
+    all: '/items/currency/#catalysts',
     blurb: 'Add quality to rings and amulets that boosts one kind of modifier.',
     term: 'catalyst',
     names: ['Flesh Catalyst', 'Neural Catalyst', 'Carapace Catalyst', 'Reaver Catalyst', 'Sibilant Catalyst', 'Skittering Catalyst', 'Adaptive Catalyst', "Esh's Catalyst"],
   },
+];
+const listTitle = (slug: string) => ITEM_LISTS.find((l) => l.slug === slug)!.title;
+const FULL_LISTS = [
+  ...ITEM_LISTS.map((l) => ({ href: `/items/${l.slug}/`, title: l.title, count: l.entries().length })),
+  { href: '/items/uniques/', title: 'Unique items', count: allUniques().length },
+  { href: '/items/currency/', title: 'Currency and crafting items', count: null },
 ];
 ---
 
@@ -121,7 +137,22 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
         </Callout>
       </div>
 
-      <h2 class="mt-10 text-2xl font-bold">Weapons and armour</h2>
+      <h2 class="mt-10 text-2xl font-bold">Complete lists</h2>
+      <p class="mt-1 text-muted">Every item in the game, by type, with search and filters. The rows further down are just a taste.</p>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          FULL_LISTS.map((l) => (
+            <li>
+              <a class="flex items-center justify-between rounded-xl border border-border bg-surface p-4 font-semibold hover:border-accent" href={l.href}>
+                <span>{l.title}</span>
+                {l.count && <span class="text-sm font-normal text-muted">{l.count}</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="mt-12 text-2xl font-bold">Weapons and armour</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">
         {
           SLOTS.map((slot) => (
@@ -137,6 +168,7 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
                     </li>
                   ))}
               </ul>
+              <a class="mt-3 inline-block text-sm text-accent underline" href={`/items/${slot.all}/`}>See all {listTitle(slot.all).toLowerCase()} →</a>
             </section>
           ))
         }
@@ -156,6 +188,7 @@ const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[
                   </li>
                 ))}
               </ul>
+              <a class="mt-3 inline-block text-sm text-accent underline" href={group.all}>See all {group.title.toLowerCase()} →</a>
             </section>
           ))
         }
