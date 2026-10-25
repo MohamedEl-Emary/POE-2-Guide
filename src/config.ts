@@ -114,6 +114,12 @@ export const NAV: NavSection[] = [
     links: [
       { label: 'How currency works', href: '/farming/' },
       { label: 'Beginner farming', href: '/farming/beginner-farming/' },
+      { label: 'Expedition', href: '/farming/expedition/' },
+      { label: 'Citadel fragments', href: '/farming/citadel-fragments/' },
+      { label: 'Ritual', href: '/farming/ritual/' },
+      { label: 'Abyss', href: '/farming/abyss-omens/' },
+      { label: 'Breach', href: '/farming/breach/' },
+      { label: 'Delirium and boss rush', href: '/farming/delirium-boss-rush/' },
     ],
   },
   {

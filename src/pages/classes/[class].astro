@@ -3,7 +3,7 @@ import { getEntries, render, type CollectionEntry } from 'astro:content';
 import AscendancyCard from '../../components/AscendancyCard.astro';
 import BuildCard from '../../components/BuildCard.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
-import { ATTRIBUTE_NAMES, Callout, getPublished, GlossaryTerm } from '../../lib/content';
+import { ATTRIBUTE_NAMES, getPublished, mdxComponents } from '../../lib/content';
 import { isRecommendable } from '../../lib/patch';
 
 export async function getStaticPaths() {
@@ -42,7 +42,7 @@ const extraHeadings = [
     <div><dt class="text-muted">Beginner friendly</dt><dd class="mt-1 font-semibold">{d.beginnerFriendly ? `${d.beginnerFriendly}/5 (our opinion)` : 'Not rated yet'}</dd></div>
   </dl>
 
-  <Content components={{ Callout, GlossaryTerm }} />
+  <Content components={mdxComponents} />
 
   {ascendancies.length > 0 && (
     <>

@@ -2,7 +2,7 @@
 import { getEntry, render, type CollectionEntry } from 'astro:content';
 import BuildCard from '../../components/BuildCard.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
-import { Callout, getPublished, GlossaryTerm } from '../../lib/content';
+import { getPublished, mdxComponents } from '../../lib/content';
 import { isRecommendable } from '../../lib/patch';
 
 export async function getStaticPaths() {
@@ -45,7 +45,7 @@ const allHeadings = [
     </>
   )}
 
-  <Content components={{ Callout, GlossaryTerm }} />
+  <Content components={mdxComponents} />
 
   <h2 id="builds">Builds</h2>
   {builds.length > 0 ? (

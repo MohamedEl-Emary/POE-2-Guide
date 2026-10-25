@@ -13,20 +13,22 @@ export function guideHref(entry: CollectionEntry<'guides'>): string {
   return `/${entry.id.replace(/\/?index$/, '')}/`.replace(/\/+/g, '/');
 }
 
-const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/', '/passive-tree/', '/items/', '/items/uniques/', '/items/currency/'];
+const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/', '/passive-tree/', '/items/', '/items/uniques/', '/items/currency/', '/builds/', '/builds/tier-list/'];
 
 /** Every route that exists in this build, used to grey out nav links for pages not written yet. */
 export async function getLiveRoutes(): Promise<Set<string>> {
-  const [guides, classes, ascendancies] = await Promise.all([
+  const [guides, classes, ascendancies, builds] = await Promise.all([
     getPublished('guides'),
     getPublished('classes'),
     getPublished('ascendancies'),
+    getPublished('builds'),
   ]);
   return new Set([
     ...STATIC_ROUTES,
     ...guides.map(guideHref),
     ...classes.map((c) => `/classes/${c.id}/`),
     ...ascendancies.map((a) => `/ascendancies/${a.id}/`),
+    ...builds.map((b) => `/builds/${b.id}/`),
   ]);
 }
 
@@ -38,3 +40,14 @@ export { default as GlossaryTerm } from '../components/GlossaryTerm.astro';
 export { default as CurrencyGrid } from '../components/CurrencyGrid.astro';
 export { default as Item } from '../components/Item.astro';
 export { default as ItemIcon } from '../components/ItemIcon.astro';
+
+import Callout from '../components/Callout.astro';
+import CurrencyGrid from '../components/CurrencyGrid.astro';
+import GlossaryTerm from '../components/GlossaryTerm.astro';
+import Item from '../components/Item.astro';
+import ItemIcon from '../components/ItemIcon.astro';
+import GemSetup from '../components/GemSetup.astro';
+import ProgressChecklist from '../components/ProgressChecklist.astro';
+
+/** Pass to `<Content components={mdxComponents} />` so every MDX file can use these. */
+export const mdxComponents = { Callout, CurrencyGrid, GemSetup, GlossaryTerm, Item, ItemIcon, ProgressChecklist };

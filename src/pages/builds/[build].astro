@@ -1,0 +1,58 @@
+---
+import { getEntry, render, type CollectionEntry } from 'astro:content';
+import RatingBars from '../../components/RatingBars.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getPublished, guideHref, mdxComponents } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const builds = await getPublished('builds');
+  const guides = await getPublished('guides');
+  for (const b of builds) {
+    const asc = await getEntry(b.data.ascendancy);
+    if (asc.data.class.id !== b.data.class.id) {
+      throw new Error(`Build "${b.id}": ascendancy "${asc.id}" doesn't belong to class "${b.data.class.id}"`);
+    }
+    for (const f of b.data.farms) {
+      if (!guides.some((g) => g.id === `farming/${f}`)) throw new Error(`Build "${b.id}": no farming guide "${f}"`);
+    }
+  }
+  return builds.map((entry) => ({ params: { build: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<'builds'> };
+const d = entry.data;
+const [cls, asc] = await Promise.all([getEntry(d.class), getEntry(d.ascendancy)]);
+const farms = (await getPublished('guides')).filter((g) => d.farms.some((f) => g.id === `farming/${f}`));
+const { Content, headings } = await render(entry);
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Builds', href: '/builds/' },
+  { label: d.title, href: `/builds/${entry.id}/` },
+];
+const budgetLabel = { starter: 'Starter (almost free)', low: 'Low', medium: 'Medium', high: 'High' }[d.budget];
+---
+
+<GuideLayout {...d} breadcrumbs={breadcrumbs} headings={headings}>
+  <section slot="summary" aria-label="Build summary" class="mb-8 grid gap-5 rounded-xl border border-border bg-surface p-5 text-sm md:grid-cols-2">
+    <dl class="grid grid-cols-2 gap-3">
+      <div><dt class="text-muted">Class</dt><dd class="mt-0.5 font-semibold"><a class="text-accent hover:underline" href={`/classes/${cls.id}/`}>{cls.data.title}</a></dd></div>
+      <div><dt class="text-muted">Ascendancy</dt><dd class="mt-0.5 font-semibold"><a class="text-accent hover:underline" href={`/ascendancies/${asc.id}/`}>{asc.data.title}</a></dd></div>
+      <div><dt class="text-muted">Main skill</dt><dd class="mt-0.5 font-semibold">{d.mainSkill}</dd></div>
+      <div><dt class="text-muted">Budget</dt><dd class="mt-0.5 font-semibold">{budgetLabel}</dd></div>
+      <div><dt class="text-muted">League starter</dt><dd class="mt-0.5 font-semibold">{d.leagueStarter ? 'Yes' : 'No'}</dd></div>
+      <div><dt class="text-muted">SSF friendly</dt><dd class="mt-0.5 font-semibold">{d.ssfFriendly ? 'Yes' : 'No'}</dd></div>
+      <div><dt class="text-muted">Tier</dt><dd class="mt-0.5 font-semibold"><a class="text-accent hover:underline" href="/builds/tier-list/">{d.tier} tier</a></dd></div>
+      <div><dt class="text-muted">Includes leveling</dt><dd class="mt-0.5 font-semibold">{d.leveling ? 'Yes' : 'No'}</dd></div>
+    </dl>
+    <div>
+      <RatingBars ratings={d.ratings} />
+      <p class="mt-2 text-xs text-muted">Ratings and tier are this site's opinion.</p>
+      {farms.length > 0 && (
+        <p class="mt-4">Pairs well with: {farms.map((f, i) => <>{i > 0 && ', '}<a class="text-accent hover:underline" href={guideHref(f)}>{f.data.title}</a></>)}</p>
+      )}
+      {d.pobLink && <p class="mt-2"><a class="text-accent underline" href={d.pobLink} rel="noopener">Path of Building link</a></p>}
+    </div>
+  </section>
+
+  <Content components={mdxComponents} />
+</GuideLayout>

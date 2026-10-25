@@ -1,0 +1,126 @@
+---
+import { getEntry } from 'astro:content';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import BuildCard from '../../components/BuildCard.astro';
+import Callout from '../../components/Callout.astro';
+import { CURRENT_PATCH } from '../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished } from '../../lib/content';
+import { getPatchState } from '../../lib/patch';
+
+const order = { current: 0, review: 1, outdated: 2 } as const;
+const tierOrder = { S: 0, A: 1, B: 2, C: 3 } as const;
+const builds = (await getPublished('builds')).sort(
+  (a, b) =>
+    order[getPatchState(a.data)] - order[getPatchState(b.data)] ||
+    tierOrder[a.data.tier] - tierOrder[b.data.tier] ||
+    a.data.title.localeCompare(b.data.title),
+);
+const classes = (await getPublished('classes')).filter((c) => builds.some((b) => b.data.class.id === c.id));
+const ascTitles = Object.fromEntries(await Promise.all(builds.map(async (b) => [b.id, (await getEntry(b.data.ascendancy)).data.title])));
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Builds', href: '/builds/' },
+];
+const selectClass = 'mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm';
+---
+
+<BaseLayout
+  title="Path of Exile 2 build guides"
+  description={`Beginner-friendly Path of Exile 2 build guides for patch ${CURRENT_PATCH}. Filter by class, budget, play style, league starter and SSF to find your next character.`}
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-6xl px-4 py-8" data-pagefind-body>
+    <Breadcrumbs items={breadcrumbs} />
+    <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Build guides</h1>
+    <p class="mt-4 max-w-3xl text-lg text-muted">
+      Complete guides from level 1 to the endgame, written for players who are new to Path of Exile 2. Not sure where to start?
+      Pick anything marked <strong class="text-fg">League starter</strong>, or see the <a class="text-accent underline" href="/builds/tier-list/">tier list</a>.
+    </p>
+    <div class="max-w-3xl">
+      <Callout type="warning" title="Builds change every patch">
+        <p>These guides were written for patch {CURRENT_PATCH}. Patch 1.0 on December 11, 2026 is expected to bring balance changes, and each guide will be re-checked then. Look for the badge at the top of every guide.</p>
+      </Callout>
+    </div>
+
+    <form id="build-filter" class="mt-6 grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-3 lg:grid-cols-6" data-pagefind-ignore>
+      <label class="text-sm">Class
+        <select name="class" class={selectClass}>
+          <option value="">All classes</option>
+          {classes.map((c) => <option value={c.id}>{c.data.title}</option>)}
+        </select>
+      </label>
+      <label class="text-sm">Budget
+        <select name="budget" class={selectClass}>
+          <option value="">Any budget</option>
+          <option value="starter">Starter</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+        </select>
+      </label>
+      <label class="text-sm">Play style
+        <select name="playstyle" class={selectClass}>
+          <option value="">Any style</option>
+          <option value="melee">Melee</option><option value="ranged">Ranged</option><option value="caster">Caster</option><option value="minion">Minion</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-2 self-end py-2 text-sm"><input type="checkbox" name="starter" class="h-4 w-4 accent-[var(--accent)]" /> League starter</label>
+      <label class="flex items-center gap-2 self-end py-2 text-sm"><input type="checkbox" name="ssf" class="h-4 w-4 accent-[var(--accent)]" /> SSF friendly</label>
+      <button type="reset" class="self-end rounded-md border border-border px-3 py-2 text-sm hover:border-accent">Reset</button>
+    </form>
+    <p id="build-count" class="mt-4 text-sm text-muted" aria-live="polite" data-pagefind-ignore>{builds.length} builds</p>
+
+    <ul id="build-list" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {builds.map((b) => (
+        <li
+          data-class={b.data.class.id}
+          data-budget={b.data.budget}
+          data-playstyle={b.data.playstyle}
+          data-starter={String(b.data.leagueStarter)}
+          data-ssf={String(b.data.ssfFriendly)}
+          data-search={`${b.data.title} ${b.data.mainSkill} ${ascTitles[b.id]}`}
+        >
+          <BuildCard entry={b} />
+        </li>
+      ))}
+    </ul>
+    <p id="build-empty" class="mt-6 hidden text-muted">No builds match those filters yet. Try removing one.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('build-filter') as HTMLFormElement;
+  const items = [...document.querySelectorAll<HTMLLIElement>('#build-list > li')];
+  const count = document.getElementById('build-count')!;
+  const empty = document.getElementById('build-empty')!;
+
+  const apply = () => {
+    const f = new FormData(form);
+    const want = {
+      class: String(f.get('class') ?? ''),
+      budget: String(f.get('budget') ?? ''),
+      playstyle: String(f.get('playstyle') ?? ''),
+      starter: f.get('starter') ? 'true' : '',
+      ssf: f.get('ssf') ? 'true' : '',
+    };
+    let shown = 0;
+    for (const li of items) {
+      const match = Object.entries(want).every(([key, value]) => !value || li.dataset[key] === value);
+      li.hidden = !match;
+      if (match) shown++;
+    }
+    count.textContent = `${shown} build${shown === 1 ? '' : 's'}`;
+    empty.classList.toggle('hidden', shown > 0);
+    // Keep the filters in the URL so a filtered list can be shared.
+    const params = new URLSearchParams(Object.entries(want).filter(([, v]) => v));
+    history.replaceState(null, '', params.size ? `?${params}` : location.pathname);
+  };
+
+  const initial = new URLSearchParams(location.search);
+  for (const [key, value] of initial) {
+    const el = form.elements.namedItem(key);
+    if (el instanceof HTMLSelectElement) el.value = value;
+    if (el instanceof HTMLInputElement) el.checked = value === 'true';
+  }
+  form.addEventListener('change', apply);
+  form.addEventListener('reset', () => setTimeout(apply));
+  apply();
+</script>

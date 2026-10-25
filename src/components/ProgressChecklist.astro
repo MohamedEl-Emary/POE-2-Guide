@@ -1,0 +1,71 @@
+---
+// Interactive checklist for guides. Ticks are saved in this browser only
+// (localStorage, keyed by `id`), and the page still works when storage is blocked.
+export interface ChecklistGroup {
+  title: string;
+  items: { id: string; label: string }[];
+}
+export interface Props {
+  /** Storage key; change it to reset everyone's saved ticks (e.g. at 1.0). */
+  id: string;
+  groups: ChecklistGroup[];
+}
+const { id, groups } = Astro.props;
+const total = groups.reduce((n, g) => n + g.items.length, 0);
+---
+
+<div class="progress-checklist not-prose my-6 rounded-xl border border-border bg-surface p-5" data-checklist={id}>
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm font-semibold" aria-live="polite"><span data-done>0</span> of {total} done</p>
+    <button type="button" data-reset class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2">Reset</button>
+  </div>
+  <div class="h-2 overflow-hidden rounded-full bg-surface-2" aria-hidden="true">
+    <div data-bar class="h-full bg-accent transition-[width]" style="width:0%"></div>
+  </div>
+  {groups.map((g) => (
+    <fieldset class="mt-5">
+      <legend class="mb-2 font-semibold">{g.title}</legend>
+      <ul class="space-y-2">
+        {g.items.map((item) => (
+          <li>
+            <label class="flex cursor-pointer items-start gap-3 text-sm">
+              <input type="checkbox" value={item.id} class="mt-0.5 size-4 shrink-0 accent-[var(--accent)]" />
+              <span>{item.label}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </fieldset>
+  ))}
+  <p class="mt-5 text-xs text-muted">Saved in this browser only.</p>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-checklist]')) {
+    const key = `checklist:${root.dataset.checklist}`;
+    const boxes = [...root.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+    const done = root.querySelector('[data-done]')!;
+    const bar = root.querySelector<HTMLElement>('[data-bar]')!;
+
+    let saved: string[] = [];
+    try {
+      saved = JSON.parse(localStorage.getItem(key) ?? '[]');
+    } catch {}
+    for (const b of boxes) b.checked = saved.includes(b.value);
+
+    const update = () => {
+      const ticked = boxes.filter((b) => b.checked).map((b) => b.value);
+      done.textContent = String(ticked.length);
+      bar.style.width = `${(ticked.length / boxes.length) * 100}%`;
+      try {
+        localStorage.setItem(key, JSON.stringify(ticked));
+      } catch {}
+    };
+    root.addEventListener('change', update);
+    root.querySelector('[data-reset]')!.addEventListener('click', () => {
+      for (const b of boxes) b.checked = false;
+      update();
+    });
+    update();
+  }
+</script>
