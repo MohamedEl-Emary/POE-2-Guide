@@ -1,0 +1,41 @@
+---
+// Picture grid of the everyday crafting currencies, shown at the top of the currency guide.
+import ItemIcon from './ItemIcon.astro';
+
+const CURRENCY: [name: string, does: string][] = [
+  ['Orb of Transmutation', 'Normal → Magic'],
+  ['Orb of Augmentation', 'Adds a mod to Magic'],
+  ['Regal Orb', 'Magic → Rare'],
+  ['Orb of Alchemy', 'Normal → Rare'],
+  ['Exalted Orb', 'Adds a mod to Rare'],
+  ['Chaos Orb', 'Swaps one mod'],
+  ['Orb of Annulment', 'Removes one mod'],
+  ['Divine Orb', 'Rerolls mod values'],
+  ['Vaal Orb', 'Corrupts an item'],
+  ['Orb of Chance', 'Maybe a Unique'],
+  ['Fracturing Orb', 'Locks one mod'],
+  ['Mirror of Kalandra', 'Copies an item'],
+  ["Blacksmith's Whetstone", 'Weapon quality'],
+  ["Armourer's Scrap", 'Armour quality'],
+  ["Arcanist's Etcher", 'Caster weapon quality'],
+  ["Glassblower's Bauble", 'Flask quality'],
+  ["Gemcutter's Prism", 'Gem quality'],
+  ["Artificer's Orb", 'Adds a rune socket'],
+  ["Lesser Jeweller's Orb", 'Adds a gem socket'],
+  ['Scroll of Wisdom', 'Identifies an item'],
+];
+---
+
+<ul class="not-prose my-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+  {
+    CURRENCY.map(([name, does]) => (
+      <li class="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
+        <ItemIcon name={name} size={48} decorative />
+        <span class="min-w-0 text-sm leading-tight">
+          <strong class="block text-fg">{name}</strong>
+          <span class="text-muted">{does}</span>
+        </span>
+      </li>
+    ))
+  }
+</ul>

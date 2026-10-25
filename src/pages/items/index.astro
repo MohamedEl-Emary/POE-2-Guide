@@ -1,0 +1,160 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Callout from '../../components/Callout.astro';
+import GlossaryTerm from '../../components/GlossaryTerm.astro';
+import ItemIcon from '../../components/ItemIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ICON_CREDIT, itemsInCategory } from '../../lib/items';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Item gallery', href: '/items/' },
+];
+
+/** Up to `count` bases spread across the category list, so a row shows the range of looks. */
+function sample(category: string, count = 8): string[] {
+  const names = itemsInCategory(category).map(([name]) => name);
+  if (names.length <= count) return names;
+  return Array.from({ length: count }, (_, i) => names[Math.floor((i * names.length) / count)]);
+}
+
+const SLOTS: { title: string; blurb: string; categories: string[] }[] = [
+  { title: 'Maces', blurb: 'Heavy hitting weapons for the Warrior. One-handed or two-handed.', categories: ['One Hand Mace', 'Two Hand Mace'] },
+  { title: 'Quarterstaves', blurb: 'Fast two-handed staves for the Monk.', categories: ['Warstaff'] },
+  { title: 'Spears', blurb: 'The Huntress weapon: melee stabs and thrown attacks.', categories: ['Spear'] },
+  { title: 'Swords', blurb: 'The Duelist weapon.', categories: ['One Hand Sword'] },
+  { title: 'Bows', blurb: 'Ranged attacks for the Ranger. Paired with a quiver.', categories: ['Bow'] },
+  { title: 'Crossbows', blurb: 'Ranged weapons with different ammunition, used by the Mercenary.', categories: ['Crossbow'] },
+  { title: 'Wands', blurb: 'One-handed caster weapons that also grant a spell.', categories: ['Wand'] },
+  { title: 'Staves', blurb: 'Two-handed caster weapons.', categories: ['Staff'] },
+  { title: 'Sceptres', blurb: 'One-handed weapons that give Spirit and a skill that buffs you or your minions.', categories: ['Sceptre'] },
+  { title: 'Talismans', blurb: 'Two-handed weapons for the Druid’s shapeshifting.', categories: ['Talisman'] },
+  { title: 'Shields and bucklers', blurb: 'Off-hands that let you block. Bucklers are the lighter, faster kind.', categories: ['Shield', 'Buckler'] },
+  { title: 'Foci and quivers', blurb: 'Off-hands for casters (focus) and bow users (quiver).', categories: ['Focus', 'Quiver'] },
+  { title: 'Helmets', blurb: 'Head armour.', categories: ['Helmet'] },
+  { title: 'Body armour', blurb: 'Your biggest source of armour, evasion or energy shield.', categories: ['Body Armour'] },
+  { title: 'Gloves', blurb: 'Hand armour.', categories: ['Gloves'] },
+  { title: 'Boots', blurb: 'Foot armour. Movement speed on boots is a big deal while levelling.', categories: ['Boots'] },
+  { title: 'Rings and amulets', blurb: 'Jewellery. You wear two rings and one amulet.', categories: ['Ring', 'Amulet'] },
+  { title: 'Belts', blurb: 'Belts hold your charms.', categories: ['Belt'] },
+  { title: 'Flasks and charms', blurb: 'Flasks refill life and mana. Charms trigger automatically to save you.', categories: ['Flask', 'Charm'] },
+];
+
+const ENDGAME: { title: string; blurb: string; term?: string; names: string[] }[] = [
+  {
+    title: 'Waystones',
+    blurb: 'Keys that open maps on the Atlas. Higher tiers are harder and drop more.',
+    term: 'waystone',
+    names: [1, 3, 5, 7, 9, 11, 13, 15, 16].map((t) => `Waystone (Tier ${t})`),
+  },
+  {
+    title: 'Precursor tablets',
+    blurb: 'Placed in towers to add a mechanic to nearby maps.',
+    term: 'precursor-tablet',
+    names: itemsInCategory('TowerAugment').map(([n]) => n),
+  },
+  {
+    title: 'Uncut gems',
+    blurb: 'You cut these into the skill, spirit or support gem of your choice.',
+    term: 'uncut-gem',
+    names: ['Uncut Skill Gem', 'Uncut Spirit Gem', 'Uncut Support Gem'],
+  },
+  {
+    title: 'Jewels',
+    blurb: 'Socketed into the passive tree for extra stats.',
+    term: 'jewel',
+    names: itemsInCategory('Jewel').map(([n]) => n),
+  },
+  {
+    title: 'Essences',
+    blurb: 'Crafting items that add one guaranteed modifier.',
+    term: 'essence',
+    names: ['Essence of Flames', 'Essence of Ice', 'Essence of Electricity', 'Essence of the Body', 'Essence of the Mind', 'Essence of Haste', 'Essence of Battle', 'Essence of Sorcery'],
+  },
+  {
+    title: 'Omens',
+    blurb: 'Change what your next currency use does, for more controlled crafting.',
+    term: 'omen',
+    names: ['Omen of Light', 'Omen of Sinistral Exaltation', 'Omen of Dextral Exaltation', 'Omen of Whittling', 'Omen of Greater Annulment', 'Omen of Corruption', 'Omen of Sinistral Annulment', 'Omen of Dextral Coronation'],
+  },
+  {
+    title: 'Runes',
+    blurb: 'Put into socketed equipment for a fixed bonus.',
+    term: 'rune',
+    names: ['Body Rune', 'Charging Rune', 'Adept Rune', 'Ancient Rune of the Titan', 'Ancient Rune of Prowess', 'Ancient Rune of Discovery'],
+  },
+  {
+    title: 'Catalysts',
+    blurb: 'Add quality to rings and amulets that boosts one kind of modifier.',
+    term: 'catalyst',
+    names: ['Flesh Catalyst', 'Neural Catalyst', 'Carapace Catalyst', 'Reaver Catalyst', 'Sibilant Catalyst', 'Skittering Catalyst', 'Adaptive Catalyst', "Esh's Catalyst"],
+  },
+];
+---
+
+<BaseLayout
+  title="Item gallery"
+  description="See what Path of Exile 2 items look like: every weapon and armour type, jewellery, flasks, waystones, tablets, essences, omens and more, with a plain-English note on each."
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div data-pagefind-body>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Item gallery</h1>
+      <p class="mt-4 max-w-3xl text-lg text-muted">
+        What every kind of item looks like in game, so you can recognise loot on the ground. Each row shows a spread of
+        the base types for that slot, from early levelling bases to endgame ones. Hover or long-press an icon to see its name.
+      </p>
+      <div class="max-w-3xl">
+        <Callout type="beginner">
+          <p>
+            Want the crafting orbs? They're on <a href="/crafting/currency/">Every currency item explained</a>. Looking for a
+            specific unique? Browse the <a href="/items/uniques/">unique items gallery</a>.
+          </p>
+        </Callout>
+      </div>
+
+      <h2 class="mt-10 text-2xl font-bold">Weapons and armour</h2>
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        {
+          SLOTS.map((slot) => (
+            <section class="rounded-xl border border-border bg-surface p-4">
+              <h3 class="text-lg font-semibold">{slot.title}</h3>
+              <p class="mt-1 text-sm text-muted">{slot.blurb}</p>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {slot.categories
+                  .flatMap((c) => sample(c, slot.categories.length > 1 ? 5 : 8))
+                  .map((name) => (
+                    <li title={name}>
+                      <ItemIcon name={name} size={56} />
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+
+      <h2 class="mt-12 text-2xl font-bold">Endgame and crafting items</h2>
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        {
+          ENDGAME.map((group) => (
+            <section class="rounded-xl border border-border bg-surface p-4">
+              <h3 class="text-lg font-semibold">{group.term ? <GlossaryTerm id={group.term}>{group.title}</GlossaryTerm> : group.title}</h3>
+              <p class="mt-1 text-sm text-muted">{group.blurb}</p>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {group.names.map((name) => (
+                  <li title={name}>
+                    <ItemIcon name={name} size={56} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT}</p>
+  </div>
+</BaseLayout>

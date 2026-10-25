@@ -13,7 +13,7 @@ export function guideHref(entry: CollectionEntry<'guides'>): string {
   return `/${entry.id.replace(/\/?index$/, '')}/`.replace(/\/+/g, '/');
 }
 
-const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/'];
+const STATIC_ROUTES = ['/', '/start-here/', '/about/', '/glossary/', '/search/', '/classes/', '/patches/', '/passive-tree/', '/items/', '/items/uniques/'];
 
 /** Every route that exists in this build, used to grey out nav links for pages not written yet. */
 export async function getLiveRoutes(): Promise<Set<string>> {
@@ -35,3 +35,5 @@ export const ATTRIBUTE_NAMES = { str: 'Strength', dex: 'Dexterity', int: 'Intell
 /** MDX components available in every content file without importing them. */
 export { default as Callout } from '../components/Callout.astro';
 export { default as GlossaryTerm } from '../components/GlossaryTerm.astro';
+export { default as CurrencyGrid } from '../components/CurrencyGrid.astro';
+export { default as ItemIcon } from '../components/ItemIcon.astro';

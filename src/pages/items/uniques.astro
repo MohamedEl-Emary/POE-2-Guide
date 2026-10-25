@@ -1,0 +1,98 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ItemIcon from '../../components/ItemIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { allUniques, ICON_CREDIT } from '../../lib/items';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Item gallery', href: '/items/' },
+  { label: 'Unique items', href: '/items/uniques/' },
+];
+const uniques = allUniques();
+const groups = [...new Set(uniques.map(([, u]) => u.c))].sort();
+const chip = 'rounded-full border border-border bg-surface px-3 py-1 text-sm hover:border-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-fg';
+---
+
+<BaseLayout
+  title="Unique items gallery"
+  description={`Browse all ${uniques.length} Path of Exile 2 unique items by picture. Filter by slot, search by name or base type, and open any unique on poe2db for its full stats.`}
+  breadcrumbs={breadcrumbs}
+>
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div data-pagefind-body>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">Unique items</h1>
+      <p class="mt-4 max-w-3xl text-lg text-muted">
+        Uniques are orange-named items with fixed, often build-defining effects. Here are all {uniques.length} of them by
+        picture. Select one to read its full stats on poe2db, and check poe.ninja before you buy one, because prices
+        swing a lot.
+      </p>
+    </div>
+
+    <div data-uniques class="mt-6">
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by slot">
+        <button type="button" class={chip} data-group="" aria-pressed="true">All</button>
+        {groups.map((g) => <button type="button" class={chip} data-group={g} aria-pressed="false">{g}</button>)}
+      </div>
+      <label class="mt-4 flex max-w-md flex-col text-sm font-semibold">
+        Search
+        <input
+          data-search
+          type="search"
+          placeholder="Name or base type"
+          class="mt-1 rounded-md border border-border bg-surface px-2 py-1.5 font-normal"
+        />
+      </label>
+      <p data-count class="mt-3 text-sm text-muted" aria-live="polite">{uniques.length} uniques</p>
+
+      <ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {
+          uniques.map(([name, u]) => (
+            <li data-item data-group={u.c} data-text={`${name} ${u.b}`.toLowerCase()}>
+              <a
+                href={`https://poe2db.tw/us/${encodeURIComponent(name.replaceAll("'", '').replaceAll(' ', '_'))}`}
+                class="flex h-full flex-col items-center gap-2 rounded-xl border border-border bg-surface p-3 text-center transition hover:-translate-y-0.5 hover:border-accent"
+              >
+                <ItemIcon name={name} unique size={96} decorative />
+                <span class="text-sm font-semibold leading-tight text-[#e0954a] light:text-[#9a4f0c]">{name}</span>
+                <span class="text-xs text-muted">{u.b}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} Unique stats live on poe2db, which we link to rather than copy.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-uniques]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-item]')];
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-group]')];
+    const search = root.querySelector<HTMLInputElement>('[data-search]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    let group = '';
+    const apply = () => {
+      const q = search.value.trim().toLowerCase();
+      let shown = 0;
+      for (const card of cards) {
+        const visible = (!group || card.dataset.group === group) && (!q || card.dataset.text!.includes(q));
+        card.hidden = !visible;
+        if (visible) shown++;
+      }
+      count.textContent = `${shown} unique${shown === 1 ? '' : 's'}`;
+    };
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        group = b.dataset.group ?? '';
+        for (const other of buttons) other.setAttribute('aria-pressed', String(other === b));
+        apply();
+      });
+    }
+    search.addEventListener('input', apply);
+  }
+</script>

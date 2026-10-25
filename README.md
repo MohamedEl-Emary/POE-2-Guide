@@ -87,6 +87,14 @@ For the Duelist at 1.0: fill in `attributes`, `beginnerFriendly` and `ascendanci
 
 Create `src/content/builds/<slug>.mdx` using the build fields in `src/content.config.ts` (`class`, `ascendancy`, `mainSkill`, `budget`, `leagueStarter`, `ssfFriendly`, `ratings`, `pobLink`, `leveling`). `class` and `ascendancy` must match file names in `content/classes/` and `content/ascendancies/`, or the build fails.
 
+## Updating the passive tree
+
+`/passive-tree/` draws the tree from `public/data/passive-tree.json`, which is generated from Grinding Gear Games' official [passive tree export](https://github.com/grindinggear/poe2-skilltree-export). When GGG publishes a new tree, set `TREE_VERSION` in `scripts/build-passive-tree.mjs` and run `node scripts/build-passive-tree.mjs` (or pass a local `data.json` path). Only node names, stats and positions are kept. The export's icon paths are dropped because they point at GGG artwork. Shared tree links include the version, so links made on an older tree open with an empty plan instead of the wrong nodes.
+
+## Item icons
+
+`<ItemIcon name="..." />` (and `unique` for uniques) shows an item's official icon, loaded from GGG's CDN. It can be used in any MDX file without importing it. Names must match the game exactly; a typo fails the build. The name → URL list lives in `src/data/item-icons.json` and is regenerated with `node scripts/build-item-icons.mjs`, which reads the item data from [Exiled Exchange 2](https://github.com/Kvan7/Exiled-Exchange-2) (MIT). Bump `SOURCE_REF` in that script to a newer release after a big patch.
+
 ## How the patch banner works
 
 `CURRENT_PATCH` in `src/config.ts` is the single source of truth. Every page compares its own `patch` and `status`:
@@ -101,13 +109,14 @@ Create `src/content/builds/<slug>.mdx` using the build fields in `src/content.co
 
 1. In `src/config.ts`, set `CURRENT_PATCH = '1.0'`. Every page written for 0.5.x now shows the yellow banner.
 2. In `src/content/patches/1-0.md`, set `upcoming: false`.
-3. Re-verify pages one by one. When a page is accurate for 1.0, set `patch: "1.0"` and update `lastVerified`. Mark pages you know are wrong `status: outdated`.
-4. Add the Duelist and its Ascendancies, and rewrite the leveling guide for six Acts.
+3. Regenerate the passive tree (see above) once GGG publishes the 1.0 export.
+4. Re-verify pages one by one. When a page is accurate for 1.0, set `patch: "1.0"` and update `lastVerified`. Mark pages you know are wrong `status: outdated`.
+5. Add the Duelist and its Ascendancies, and rewrite the leveling guide for six Acts.
 
 Evergreen pages flag too. That's intentional: they become green again once someone has checked them.
 
 ## Content rules
 
 - Original words only. Summarise and link; never copy from wikis, patch notes or other guides.
-- No Grinding Gear Games art, logos or class portraits anywhere in the repo.
+- No Grinding Gear Games art, logos or class portraits stored in the repo. Item icons are the one exception to using their art: they're hotlinked from GGG's CDN (`<ItemIcon name="Divine Orb" />`), never downloaded or committed. Mohamed approved this in October 2026.
 - Never state exchange rates or exact profits as fact. Give ranges and link to poe.ninja.

@@ -1,0 +1,52 @@
+---
+// An item's official icon on a dark inventory-style tile. The image loads from
+// GGG's CDN; see scripts/build-item-icons.mjs.
+import { getItemIcon } from '../lib/items';
+
+export interface Props {
+  /** Exact in-game name, e.g. "Divine Orb" or "Headhunter". */
+  name: string;
+  unique?: boolean;
+  /** Tile size in pixels. */
+  size?: number;
+  /** Hide the name from screen readers when it's already written next to the icon. */
+  decorative?: boolean;
+  class?: string;
+}
+const { name, unique = false, size = 56, decorative = false, class: className = '' } = Astro.props;
+const icon = getItemIcon(name, unique);
+// Fit the item's cell shape (1×1 orbs, 2×4 armour) inside the square tile.
+const scale = (size * 0.86) / Math.max(icon.w, icon.h);
+---
+
+<span
+  class:list={['item-tile inline-grid shrink-0 place-items-center rounded-md', unique && 'item-tile-unique', className]}
+  style={`width:${size}px;height:${size}px`}
+>
+  <img
+    src={icon.i}
+    alt={decorative ? '' : name}
+    width={Math.round(icon.w * scale)}
+    height={Math.round(icon.h * scale)}
+    loading="lazy"
+    decoding="async"
+    referrerpolicy="no-referrer"
+  />
+</span>
+
+<style is:global>
+  .item-tile {
+    background: radial-gradient(circle at 50% 40%, #2a241d, #110e0b 75%);
+    border: 1px solid #3a332c;
+    overflow: hidden;
+  }
+  .item-tile-unique {
+    border-color: #7a4a1d;
+    background: radial-gradient(circle at 50% 40%, #3a2614, #110e0b 75%);
+  }
+  .item-tile img {
+    object-fit: contain;
+    /* If GGG's CDN is unreachable, show an empty tile instead of squashed alt text. */
+    font-size: 0;
+  }
+</style>
