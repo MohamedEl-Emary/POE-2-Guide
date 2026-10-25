@@ -95,6 +95,18 @@ Create `src/content/builds/<slug>.mdx` using the build fields in `src/content.co
 
 `<ItemIcon name="..." />` (and `unique` for uniques) shows an item's official icon, loaded from GGG's CDN. It can be used in any MDX file without importing it. Names must match the game exactly; a typo fails the build. The name → URL list lives in `src/data/item-icons.json` and is regenerated with `node scripts/build-item-icons.mjs`, which reads the item data from [Exiled Exchange 2](https://github.com/Kvan7/Exiled-Exchange-2) (MIT). Bump `SOURCE_REF` in that script to a newer release after a big patch.
 
+## Item tooltips
+
+Any element with `data-item="<name>"` (or `data-item="u:<name>"` for a unique) shows a game-style tooltip on hover, keyboard focus or tap. `<ItemIcon>` tiles do this automatically, and `<Item name="Divine Orb" />` adds an inline mention with icon and tooltip to any MDX guide. The script is `src/scripts/item-tooltip.ts`, loaded on every page; it fetches `public/data/item-tooltips.json` the first time someone opens a tooltip.
+
+That file is generated. Unique mods, base stats, flavour text, essence and rune effects are game data read from [Path of Building PoE2](https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2)'s data files (last built from commit `bb52d6b`). Currency, omen and catalyst descriptions are our own wording in `src/data/item-descriptions.json`; edit that file to add or fix one. To rebuild after a patch:
+
+```sh
+git clone --depth 1 https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2 /tmp/pob
+node scripts/build-item-icons.mjs
+node scripts/build-item-tooltips.mjs /tmp/pob/src/Data
+```
+
 ## How the patch banner works
 
 `CURRENT_PATCH` in `src/config.ts` is the single source of truth. Every page compares its own `patch` and `status`:

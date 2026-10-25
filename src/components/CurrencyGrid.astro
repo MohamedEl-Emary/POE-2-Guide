@@ -1,5 +1,6 @@
 ---
 // Picture grid of the everyday crafting currencies, shown at the top of the currency guide.
+import { tooltipKey } from '../lib/items';
 import ItemIcon from './ItemIcon.astro';
 
 const CURRENCY: [name: string, does: string][] = [
@@ -29,12 +30,18 @@ const CURRENCY: [name: string, does: string][] = [
 <ul class="not-prose my-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
   {
     CURRENCY.map(([name, does]) => (
-      <li class="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
-        <ItemIcon name={name} size={48} decorative />
-        <span class="min-w-0 text-sm leading-tight">
-          <strong class="block text-fg">{name}</strong>
-          <span class="text-muted">{does}</span>
-        </span>
+      <li>
+        <button
+          type="button"
+          data-item={tooltipKey(name)}
+          class="flex h-full w-full cursor-help items-center gap-3 rounded-lg border border-border bg-surface p-2 text-left hover:border-accent"
+        >
+          <ItemIcon name={name} size={48} tooltip={false} />
+          <span class="min-w-0 text-sm leading-tight">
+            <strong class="block text-fg">{name}</strong>
+            <span class="text-muted">{does}</span>
+          </span>
+        </button>
       </li>
     ))
   }

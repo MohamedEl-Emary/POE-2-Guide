@@ -137,6 +137,7 @@ export const NAV: NavSection[] = [
       { label: 'Passive tree', href: '/passive-tree/' },
       { label: 'Item gallery', href: '/items/' },
       { label: 'Unique items', href: '/items/uniques/' },
+      { label: 'Crafting items', href: '/items/currency/' },
       { label: 'Patch history', href: '/patches/' },
       { label: 'Tools', href: '/tools/' },
       { label: 'About', href: '/about/' },
