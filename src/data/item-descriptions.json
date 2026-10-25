@@ -83,5 +83,112 @@
     "Uncut Skill Gem": "Cut it into the skill gem of your choice, up to this gem's level",
     "Uncut Spirit Gem": "Cut it into the Spirit gem of your choice, up to this gem's level",
     "Uncut Support Gem": "Cut it into the support gem of your choice"
-  }
+  },
+  "patterns": [
+    [
+      "^Gnawed (Jawbone|Rib|Collarbone)$",
+      "Desecrates a lower-level {slot}, adding a hidden modifier you reveal later at the Well of Souls"
+    ],
+    [
+      "^Preserved (Jawbone|Rib|Collarbone|Cranium|Vertebrae)$",
+      "Desecrates a {slot}, adding a hidden modifier you reveal later at the Well of Souls"
+    ],
+    [
+      "^Ancient (Jawbone|Rib|Collarbone)$",
+      "Desecrates a {slot} with a stronger hidden modifier, which you reveal later at the Well of Souls"
+    ],
+    [
+      "^Altered Collarbone$",
+      "An Abyss bone that desecrates Breach jewellery, adding a hidden modifier you reveal later at the Well of Souls"
+    ],
+    [
+      "^(Sun|Order|Broken Circle|Black Scythe) Artifact$",
+      "Expedition currency. Spend it with the Expedition traders to buy their wares"
+    ],
+    [
+      "^Exotic Coinage$",
+      "Expedition currency. Refreshes an Expedition trader's stock"
+    ],
+    [
+      "^Expedition Logbook$",
+      "Opens a larger Expedition encounter with its own map and rewards"
+    ],
+    [
+      "^Breach Splinter$",
+      "Collect a full stack and it combines into a Breachstone"
+    ],
+    [
+      "^Breachstone$",
+      "Opens the Breach pinnacle encounter against Xesht, We That Are One"
+    ],
+    [
+      "^Simulacrum Splinter$",
+      "Collect a full stack and it combines into a Simulacrum"
+    ],
+    [
+      "^Simulacrum$",
+      "Opens the Simulacrum, a wave-based Delirium survival encounter"
+    ],
+    [
+      "^Petition Splinter$",
+      "Collect a full stack and it combines into An Audience with the King"
+    ],
+    [
+      "^An Audience with the King$",
+      "Opens the Ritual pinnacle encounter against the King in the Mists"
+    ],
+    [
+      "^(Djinn|Test of (Cunning|Strength|Time|Will)) Barya$",
+      "Starts a run of the Trial of the Sekhemas"
+    ],
+    [
+      "^Inscribed Ultimatum$",
+      "Starts a run of the Trial of Chaos"
+    ],
+    [
+      " Relic$",
+      "Place in the Relic Altar to give your Trial of the Sekhemas runs extra bonuses"
+    ],
+    [
+      "^Vaal Arcanist's Infuser$",
+      "Adds quality to a caster weapon"
+    ],
+    [
+      "^Vaal Blacksmith's Infuser$",
+      "Adds quality to a martial weapon"
+    ],
+    [
+      "^Vaal Armourer's Infuser$",
+      "Adds high quality to a weapon or piece of armour"
+    ],
+    [
+      "^Vaal Catalysing Infuser$",
+      "Adds quality to a ring or amulet"
+    ],
+    [
+      "^Ancient Infuser$",
+      "Corrupts a Precursor Tablet"
+    ],
+    [
+      "^Orb of Extraction$",
+      "Removes every rune and soul core from an item so you can use them again"
+    ],
+    [
+      "^Hinekora's Lock$",
+      "Lets an item foresee the result of the next currency you use on it"
+    ],
+    [
+      " Alloy$",
+      "Verisium alloy from Expedition, used to runeforge equipment"
+    ]
+  ],
+  "boneSlots": {
+    "Jawbone": "weapon or quiver",
+    "Rib": "piece of armour",
+    "Collarbone": "ring, amulet or belt",
+    "Cranium": "jewel",
+    "Vertebrae": "waystone"
+  },
+  "liquid": "Instils a modifier into a jewel. Which modifier depends on the kind of jewel",
+  "ancientLiquid": "Instils a modifier into a Time-Lost jewel. Which modifier depends on the kind of jewel"
 }

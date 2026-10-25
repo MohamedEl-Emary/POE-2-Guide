@@ -82,7 +82,7 @@ function render(t: Tooltip) {
   }
   if (t.d?.length) {
     const s = section();
-    for (const d of t.d) s.append(el('div', 'itt-mod', d));
+    for (const d of t.d) s.append(el('div', 'itt-mod itt-desc', d));
   }
   if (t.g?.length) {
     const s = section();
