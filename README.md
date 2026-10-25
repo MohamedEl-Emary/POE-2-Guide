@@ -19,7 +19,23 @@ Static guide site built with Astro, Tailwind CSS, MDX and Pagefind. No server, n
 
 Set `SITE_URL` (e.g. `https://example.com`) in your host's build environment so canonical URLs, the sitemap and `robots.txt` use the real domain.
 
-Deploy: any static host. Build command `pnpm build`, output directory `dist`.
+## Deploying
+
+The site is fully static, so any static host works. We recommend **Cloudflare Pages** (free, fast, reads `public/_headers` for caching). Netlify and Vercel work the same way.
+
+1. Push this repo to GitHub (done).
+2. In Cloudflare: Workers & Pages → Create → Pages → Connect to Git → pick `POE-2-Guide`.
+3. Settings:
+   - Build command: `pnpm build`
+   - Output directory: `dist`
+   - Environment variables: `NODE_VERSION` = `24`, `PNPM_VERSION` = `11`, and `SITE_URL` = your real address (e.g. `https://exilementor.com`).
+4. Deploy. Every push to `main` redeploys; pull requests get preview links.
+5. Add your custom domain under the project's Custom domains tab, then update `SITE_URL` to match and redeploy.
+6. Submit `https://<your-domain>/sitemap-index.xml` in [Google Search Console](https://search.google.com/search-console) so Google indexes the site before 1.0.
+
+`.github/workflows/build.yml` runs the same build on every pull request, so a broken page shows up as a failed check before it's merged.
+
+Each page gets a generated 1200x630 share image (`scripts/build-og.mjs`, run by `pnpm build`): text only, made from the page title, description and section.
 
 ## Project layout
 

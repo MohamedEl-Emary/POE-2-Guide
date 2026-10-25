@@ -15,7 +15,8 @@ const rows = [
   {rows.map(([label, value]) => (
     <div class="grid grid-cols-[7.5rem_1fr] items-center gap-3">
       <dt class="text-muted">{label}</dt>
-      <dd class="flex items-center gap-1" aria-label={`${value} out of 5`}>
+      <dd class="flex items-center gap-1">
+        <span class="sr-only">{value} out of 5</span>
         {[1, 2, 3, 4, 5].map((n) => (
           <span class:list={['h-2 flex-1 rounded-sm', n <= value ? 'bg-accent' : 'bg-surface-2']} aria-hidden="true" />
         ))}
