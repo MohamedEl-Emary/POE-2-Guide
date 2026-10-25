@@ -1,0 +1,33 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ItemDatabase from '../../components/ItemDatabase.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ITEM_LISTS, type ItemList } from '../../lib/item-lists';
+import { ICON_CREDIT, STATS_CREDIT } from '../../lib/items';
+
+export function getStaticPaths() {
+  return ITEM_LISTS.map((list) => ({ params: { list: list.slug }, props: { list } }));
+}
+
+const { list } = Astro.props as { list: ItemList };
+const entries = list.entries();
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Item gallery', href: '/items/' },
+  { label: list.title, href: `/items/${list.slug}/` },
+];
+---
+
+<BaseLayout title={list.title} description={list.description} breadcrumbs={breadcrumbs}>
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div data-pagefind-body>
+      <h1 class="mt-6 text-3xl font-bold sm:text-4xl">{list.title}</h1>
+      <p class="mt-4 max-w-3xl text-lg text-muted">{list.intro}</p>
+    </div>
+
+    <ItemDatabase entries={entries} groups={list.groups} noun={list.noun} searchHint={list.searchHint} />
+
+    <p class="mt-10 max-w-3xl text-sm text-muted">{ICON_CREDIT} {STATS_CREDIT}</p>
+  </div>
+</BaseLayout>

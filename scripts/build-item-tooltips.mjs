@@ -18,6 +18,8 @@ import { statTranslator } from './lib/stat-text.mjs';
 const dataDir = process.argv[2];
 if (!dataDir) throw new Error('Pass the path to Path of Building PoE2 src/Data');
 const OUT = new URL('../public/data/item-tooltips.json', import.meta.url);
+// Gem kinds and attributes for the gem list pages' filters.
+const GEM_OUT = new URL('../src/data/gem-info.json', import.meta.url);
 const read = (path) => readFile(`${dataDir}/${path}`, 'utf8');
 const json = async (url) => JSON.parse(await readFile(new URL(url, import.meta.url), 'utf8'));
 
@@ -375,6 +377,23 @@ for (const gem of gems) {
 for (const [name, item] of Object.entries(icons.items)) {
   tooltips[name] ??= { r: RARITY_OF[item.c] ?? 'normal', n: name };
 }
+
+// k: filter group, a: main attribute, t: tags shown under the name and searched.
+const ATTRIBUTES = [['reqStr', 'Strength'], ['reqDex', 'Dexterity'], ['reqInt', 'Intelligence']];
+const gemInfo = {};
+for (const gem of gems) {
+  const icon = icons.items[gem.name];
+  if (!icon || !/Gem$/.test(icon.c) || gemInfo[gem.name]) continue;
+  const top = Math.max(...ATTRIBUTES.map(([key]) => gem[key] ?? 0));
+  const a = top > 0 ? ATTRIBUTES.filter(([key]) => gem[key] === top).map(([, label]) => label).join('/') : '';
+  let k;
+  if (gem.gemType === 'Support') k = a || 'Other';
+  else if (gem.tags?.meta) k = 'Meta';
+  else if (gem.tags?.persistent) k = 'Spirit';
+  else k = { Attack: 'Attack', Spell: 'Spell', Minion: 'Minion', Warcry: 'Warcry' }[gem.gemType] ?? 'Other';
+  gemInfo[gem.name] = { k, a, t: gem.tagString || undefined };
+}
+await writeFile(GEM_OUT, JSON.stringify(gemInfo, null, 0) + '\n');
 
 await writeFile(OUT, JSON.stringify(tooltips));
 const count = (r) => Object.values(tooltips).filter((t) => t.r === r).length;
